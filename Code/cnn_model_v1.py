@@ -5,6 +5,9 @@ import matplotlib.pyplot as plt
 import time
 import cnn_datasets
 
+# Datasets
+dataset  = cnn_datasets.data_ultils()
+
 # Save model
 model_save_name= "cnn_v1_model/"
 
@@ -12,7 +15,7 @@ model_save_name= "cnn_v1_model/"
 image_width = 128
 image_height = 128
 image_channel = 3
-image_types = 5
+image_types = dataset.get_num_types()
 
 # Placeholder variables
 # Placeholder variable for the input images
@@ -132,7 +135,7 @@ merged_summary = tf.summary.merge_all()
 
 num_epochs = 50
 batch_size = 100
-dataset  = cnn_datasets.data_ultils()
+
 
 # TensorFlow Session
 with tf.Session() as sess:

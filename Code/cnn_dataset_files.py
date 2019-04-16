@@ -5,6 +5,7 @@ import cv2 as cv
 import random
 
 
+input_folder_path = "lanmark"
 train_folder_path = "train_folder"
 test_folder_path = "test_folder"
 
@@ -40,17 +41,24 @@ def copy_files_train(src_folder, id_class):
             dst_file = train_folder_path + "/" + str(id_class) + "_" + str(train_number) + ".jpg"
             train_number = train_number + 1
 
-        shutil.copy(src_file, dst_file)
-        file_number = file_number + 1
+        image = cv.imread(src_file)
+        if image is None:
+            os.remove(src_file)
+        elif len(image.shape) == 3:
+            shutil.copy(src_file, dst_file)
+            file_number = file_number + 1
+        else:
+            os.remove(src_file)
+        
         
     return file_number, test_number, train_number
 
 def separate_sample():
-    file_number0, test_number0, train_number0 = copy_files_train("flowers/daisy", 0)
-    file_number1, test_number1, train_number1 = copy_files_train("flowers/dandelion", 1)
-    file_number2, test_number2, train_number2 = copy_files_train("flowers/rose", 2)
-    file_number3, test_number3, train_number3 = copy_files_train("flowers/tulip", 3)
-    file_number4, test_number4, train_number4 = copy_files_train("flowers/sunflower", 4)
+    list_folder_name = os.listdir(input_folder_path)
+    file_id = 0
+    for folder in list_folder_name:
+        copy_files_train(input_folder_path + "/" + folder, file_id)
+        file_id += 1
 
 def load_sample(file_path, file_name):
     y = int(file_name.split('_')[0])
@@ -91,4 +99,8 @@ def load_datasets():
     y_train = np.array(y_train)
     y_test = np.array(y_test)
     
-    return  X_train, y_train, X_test, y_test
+    return  X_train, y_train, X_test, y_test, len(os.listdir(input_folder_path))
+
+
+# make_dataset_folder()
+# separate_sample()
