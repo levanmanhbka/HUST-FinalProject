@@ -4,9 +4,9 @@ import os
 import numpy as np
 import cv2 as cv
 
-model_save_name= "cnn_v1_model"
+model_save_name= "cnn_model"
 
-image='chuamotcot.jpg'
+image='chua_mot_cot.jpg'
 img=cv.imread(image)
 img=cv.resize(img,(128,128))
 img=img.reshape(1,128,128,3)
@@ -33,13 +33,10 @@ im_ph= graph.get_tensor_by_name("x_train:0")
 label_ph = graph.get_tensor_by_name("y_true:0")
 
 #Inorder to make the output to be either 0 or 1.
-network=tf.nn.sigmoid(network)
+network=tf.nn.softmax(network)
 
 # Creating the feed_dict that is required to be fed to calculate y_pred
 feed_dict_testing = {im_ph: img, label_ph: labels}
 
 result=session.run(network, feed_dict=feed_dict_testing)
-probilyty = tf.nn.softmax(result)
-
 print(result)
-print(session.run(probilyty))
