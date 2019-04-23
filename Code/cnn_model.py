@@ -3,24 +3,25 @@ import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
 import time
+import cnn_datasets
 
-# Load data
-from tensorflow.examples.tutorials.mnist import input_data
-data = input_data.read_data_sets('data/MNIST/', one_hot=True)
+# Datasets
+dataset  = cnn_datasets.data_ultils()
 
-# Check input data
-print("Size of:")
-print("- Training-set:\t\t{}".format(len(data.train.labels)))
-print("- Test-set:\t\t{}".format(len(data.test.labels)))
-print("- Validation-set:\t{}".format(len(data.validation.labels)))
+# Save model
+model_save_name= "cnn_model/"
+
+# Model parameters
+image_width = 128
+image_height = 128
+image_channel = 3
+image_types = dataset.get_num_types()
 
 # Placeholder variables
 # Placeholder variable for the input images
-x = tf.placeholder(tf.float32, shape=[None, 28*28], name='X')
-# Reshape it into [num_images, img_height, img_width, num_channels]
-x_image = tf.reshape(x, [-1, 28, 28, 1])
+x_train = tf.placeholder(tf.float32, shape=[None, image_width, image_height, image_channel], name='x_train')
 # Placeholder variable for the true labels associated with the images
-y_true = tf.placeholder(tf.float32, shape=[None, 10], name='y_true')
+y_true = tf.placeholder(tf.float32, shape=[None, image_types], name='y_true')
 y_true_cls = tf.argmax(y_true, axis=1)
 
 # Function creating new convolution layer
@@ -64,26 +65,41 @@ def new_fc_layer(input, num_inputs, num_outputs, name):
 
 # Create Convolutional Neural Network
 # Convolutional Layer 1
-layer_conv1, weights_conv1 = new_conv_layer(input=x_image, num_input_channels=1, filter_size=5, num_filters=6, name ="conv1")
+layer_conv1, weights_conv1 = new_conv_layer(input=x_train, num_input_channels= image_channel, filter_size=5, num_filters=6, name ="conv1")
+print(layer_conv1)
 # Pooling Layer 1
 layer_pool1 = new_pool_layer(layer_conv1, name="pool1")
+print(layer_pool1)
 # RelU layer 1
 layer_relu1 = new_relu_layer(layer_pool1, name="relu1")
+print(layer_relu1)
+
 # Convolutional Layer 2
 layer_conv2, weights_conv2 = new_conv_layer(input=layer_relu1, num_input_channels=6, filter_size=5, num_filters=16, name= "conv2")
+print(layer_conv2)
 # Pooling Layer 2
 layer_pool2 = new_pool_layer(layer_conv2, name="pool2")
+print(layer_pool2)
 # RelU layer 2
 layer_relu2 = new_relu_layer(layer_pool2, name="relu2")
+print(layer_relu2)
+
 # Flatten Layer
 num_features = layer_relu2.get_shape()[1:4].num_elements()
 layer_flat = tf.reshape(layer_relu2, [-1, num_features])
+print(layer_flat)
+
 # Fully-Connected Layer 1
 layer_fc1 = new_fc_layer(layer_flat, num_inputs=num_features, num_outputs=128, name="fc1")
+print(layer_fc1)
 # RelU layer 3
 layer_relu3 = new_relu_layer(layer_fc1, name="relu3")
+print(layer_relu3)
+
 # Fully-Connected Layer 2
-layer_fc2 = new_fc_layer(input=layer_relu3, num_inputs=128, num_outputs=10, name="fc2")
+layer_fc2 = new_fc_layer(input=layer_relu3, num_inputs=128, num_outputs=image_types, name="fc2")
+print(layer_fc2)
+
 # Use Softmax function to normalize the output
 with tf.variable_scope("Softmax"):
     y_pred = tf.nn.softmax(layer_fc2)
@@ -104,46 +120,54 @@ with tf.name_scope("optimizer"):
 with tf.name_scope("accuracy"):
     correct_prediction = tf.equal(y_pred_cls, y_true_cls)
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+
 # Initialize the FileWriter
-writer = tf.summary.FileWriter("Training_FileWriter/")
-writer1 = tf.summary.FileWriter("Validation_FileWriter/")
+writer_train = tf.summary.FileWriter("cnn_v1_training_file_writer/")
+writer_valid = tf.summary.FileWriter("cnn_v1_validation_file_writer/")
+
 # Add the cost and accuracy to summary
 tf.summary.scalar('loss', cost)
 tf.summary.scalar('accuracy', accuracy)
+
 # Merge all summaries together
 merged_summary = tf.summary.merge_all()
 
 
-num_epochs = 100
+num_epochs = 50
 batch_size = 100
+
 
 # TensorFlow Session
 with tf.Session() as sess:
+    # Saver
+    saver = tf.train.Saver(max_to_keep=4)
     # Initialize all variables
     sess.run(tf.global_variables_initializer())
     # Add the model graph to TensorBoard
-    writer.add_graph(sess.graph)
+    writer_train.add_graph(sess.graph)
     # Loop over number of epochs
     for epoch in range(num_epochs):
         start_time = time.time()
         train_accuracy = 0
-        for batch in range(0, int(len(data.train.labels)/batch_size)):
+        for batch in range(0, int(len(dataset.y_train)/batch_size)):
             # Get a batch of images and labels
-            x_batch, y_true_batch = data.train.next_batch(batch_size)
+            x_batch, y_true_batch = dataset.get_data_batch(batch_size)
             # Put the batch into a dict with the proper names for placeholder variables
-            feed_dict_train = {x: x_batch, y_true: y_true_batch}
+            feed_dict_train = {x_train: x_batch, y_true: y_true_batch}
             # Run the optimizer using this batch of training data.
             sess.run(optimizer, feed_dict=feed_dict_train)
             # Calculate the accuracy on the batch of training data
             train_accuracy += sess.run(accuracy, feed_dict=feed_dict_train)
             # Generate summary with the current batch of data and write to file
             summ = sess.run(merged_summary, feed_dict=feed_dict_train)
-            writer.add_summary(summ, epoch*int(len(data.train.labels)/batch_size) + batch)
-          
-        train_accuracy /= int(len(data.train.labels)/batch_size)
+            writer_train.add_summary(summ, epoch*int(len(dataset.y_train)/batch_size) + batch)
+
+        saver.save(sess, model_save_name)
+
+        train_accuracy /= int(len(dataset.y_train)/batch_size)
         # Generate summary and validate the model on the entire validation set
-        summ, vali_accuracy = sess.run([merged_summary, accuracy], feed_dict={x:data.validation.images, y_true:data.validation.labels})
-        writer1.add_summary(summ, epoch)
+        summ, vali_accuracy = sess.run([merged_summary, accuracy], feed_dict={x_train:dataset.x_test, y_true:dataset.y_test})
+        writer_valid.add_summary(summ, epoch)
         end_time = time.time()
         
         print("Epoch "+str(epoch+1)+" completed : Time usage "+str(int(end_time-start_time))+" seconds")

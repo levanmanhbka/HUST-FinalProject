@@ -102,5 +102,5 @@ def load_datasets():
     return  X_train, y_train, X_test, y_test, len(os.listdir(input_folder_path))
 
 
-# make_dataset_folder()
-# separate_sample()
+make_dataset_folder()
+separate_sample()
