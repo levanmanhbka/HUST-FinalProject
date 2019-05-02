@@ -12,8 +12,8 @@ dataset  = cnn_datasets.data_ultils()
 model_save_name= "cnn_model/"
 
 # Model parameters
-image_width = 128
-image_height = 128
+image_width = 256
+image_height = 256
 image_channel = 3
 image_types = dataset.get_num_types()
 
@@ -38,6 +38,7 @@ def new_conv_layer(input, num_input_channels, filter_size, num_filters, name):
         # Add the biases to the results of the convolution.
         layer += biases
         return layer, weights
+
 
 # Function creating pooling layer
 def new_pool_layer(input, name):
@@ -166,7 +167,8 @@ with tf.Session() as sess:
 
         train_accuracy /= int(len(dataset.y_train)/batch_size)
         # Generate summary and validate the model on the entire validation set
-        summ, vali_accuracy = sess.run([merged_summary, accuracy], feed_dict={x_train:dataset.x_test, y_true:dataset.y_test})
+        feed_dict_test = {x_train:dataset.x_test, y_true:dataset.y_test}
+        summ, vali_accuracy = sess.run([merged_summary, accuracy], feed_dict= feed_dict_test)
         writer_valid.add_summary(summ, epoch)
         end_time = time.time()
         
