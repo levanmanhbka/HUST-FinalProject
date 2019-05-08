@@ -21,7 +21,6 @@ image_types = dataset.get_num_types()
 x_train = tf.placeholder(tf.float32, shape=[None, image_width, image_height, image_channel], name='x_train')
 # Placeholder variable for the true labels associated with the images
 y_true = tf.placeholder(tf.float32, shape=[None, image_types], name='y_true')
-y_true_cls = tf.argmax(y_true, axis=1)
 
 # Function creating new convolution layer
 def new_conv_layer(input, num_input_channels, filter_size, num_filters, name):
@@ -106,18 +105,17 @@ layer_relu3 = new_relu_layer(layer_fc1, name="relu3")
 print(layer_relu3)
 
 # Fully-Connected Layer 2
-layer_fc2 = new_fc_layer(input=layer_relu3, num_inputs=128, num_outputs=image_types, name="fc2")
-print(layer_fc2)
+layer_output = new_fc_layer(input=layer_relu3, num_inputs=128, num_outputs=image_types, name="fc2")
+print(layer_output)
 
 # Use Softmax function to normalize the output
 with tf.variable_scope("Softmax"):
-    y_pred = tf.nn.softmax(layer_fc2)
-    y_pred_cls = tf.argmax(y_pred, axis=1)
+    y_pred = tf.nn.softmax(layer_output)
 
 # Cost function
 # Use Cross entropy cost function
 with tf.name_scope("cross_ent"):
-    cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits=layer_fc2, labels=y_true)
+    cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits=layer_output, labels=y_true)
     cost = tf.reduce_mean(cross_entropy)
 
 # Optimizer
@@ -127,7 +125,7 @@ with tf.name_scope("optimizer"):
 
 # Accuracy
 with tf.name_scope("accuracy"):
-    correct_prediction = tf.equal(y_pred_cls, y_true_cls)
+    correct_prediction = tf.equal(tf.argmax(y_pred, axis=1), tf.argmax(y_true, axis=1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
 # Initialize the FileWriter
