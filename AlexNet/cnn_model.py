@@ -112,13 +112,11 @@ print(layer_output)
 with tf.variable_scope("Softmax"):
     y_pred = tf.nn.softmax(layer_output)
 
-# Cost function
 # Use Cross entropy cost function
 with tf.name_scope("cross_ent"):
     cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits=layer_output, labels=y_true)
     cost = tf.reduce_mean(cross_entropy)
 
-# Optimizer
 # Use Adam Optimizer
 with tf.name_scope("optimizer"):
     optimizer = tf.train.AdamOptimizer(learning_rate=1e-4).minimize(cost)

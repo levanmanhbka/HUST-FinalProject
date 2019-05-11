@@ -1,28 +1,11 @@
-# ========================================
-# [] File Name : alexnet.py
-#
-# [] Creation Date : March 2018
-#
-# [] Created By : Ali Gholami (aligholami7596@gmail.com)
-# ========================================
-"""
-    Implementation of the AlexNet Convolutional Neural Network Architecture
-    Using Tensorflow.
-
-    Paper: ImageNet Classification with Deep Convolutional Neural Networks
-
-    Authors: Krizhevsky, Alex - Sutskever, Ilya - Hinton, Geoffrey E
-"""
 import tensorflow as tf
 import time
 from dataset_loader import DatasetLoader
 
 # General parameters of the model
+NUM_EPOCHS = 50
 BATCH_SIZE = 128
-MOMENTUM = 0.9
-WEIGHT_DECAY = 0.0005
 DROPOUT_KEEP_PROB = 0.5
-FC_HIDDEN_SIZE = 4096
 K_BIAS = 2
 N_DEPTH_RADIUS = 5
 ALPHA = 1e-4
@@ -74,8 +57,6 @@ conv_biases = {
     "f2_biases": tf.Variable(tf.truncated_normal([fc_connection_shapes["f2_shape"][1]], stddev=0.05, dtype=tf.float32), name="f2_biases"),
     "f3_biases": tf.Variable(tf.truncated_normal([fc_connection_shapes["f3_shape"][1]], stddev=0.05, dtype=tf.float32), name="f3_biases")
 }
-
-dataset_dict["total_image_size"] = dataset_dict["image_size"] * dataset_dict["image_size"]
 
 # Declare the input and output placeholders
 input_img = tf.placeholder(tf.float32, shape=[None, dataset_dict["image_size"], dataset_dict["image_size"], dataset_dict["num_channels"]])
@@ -148,9 +129,6 @@ optimizer = tf.train.AdamOptimizer(learning_rate=1e-4).minimize(cost)
 correct_pred = tf.equal(tf.argmax(y_pred, 1), tf.argmax(labels, 1))
 accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 
-num_epochs = 50
-batch_size = 100
-
 # Datasets
 dataset  = DatasetLoader()
 
@@ -159,18 +137,18 @@ with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
     # Loop over number of eporchs
     train_accuracy = 0.0
-    for epoch in range(num_epochs):
+    for epoch in range(NUM_EPOCHS):
         start_time = time.time()
-        for batch in range(0, int(dataset.get_num_train()/batch_size)):
+        for batch in range(0, int(dataset.get_num_train()/BATCH_SIZE)):
             # Get a batch of images and labels
-            x_batch, y_batch = dataset.load_batch_dataset(batch_size)
+            x_batch, y_batch = dataset.load_batch_dataset(BATCH_SIZE)
             # Put the batch into a dict with the proper names for placeholder variables
             feed_dict_train = {input_img: x_batch, labels: y_batch}
             # Run the optimizer using this batch of training data.
             sess.run(optimizer, feed_dict=feed_dict_train)
             # Calculate the accuracy on the batch of training data
             train_accuracy += sess.run(accuracy, feed_dict=feed_dict_train)
-        train_accuracy = train_accuracy / (dataset.get_num_train()/batch_size)
+        train_accuracy = train_accuracy / (dataset.get_num_train()/BATCH_SIZE)
         # Validate the model on the entire validation set
         vali_accuracy = sess.run(accuracy, feed_dict={input_img:dataset.x_test, labels:dataset.y_test})
         end_time = time.time()

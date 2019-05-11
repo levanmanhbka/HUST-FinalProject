@@ -1,5 +1,5 @@
-image_width = 128
-image_height = 128
+image_width = 256
+image_height = 256
 image_channel = 3
 
 input_folder_path = "lanmark"
