@@ -33,7 +33,7 @@ class DatasetLoader():
             print("DatasetLoader dict_lables ++++++++++++")
             print(self.dict_lables)
             print("DatasetLoader dict_lables ------------")
-        self.__load_all_datasets()
+        self.load_datasets_random(3000)
 
     def __load_all_datasets(self):
         x_train = []
@@ -52,6 +52,39 @@ class DatasetLoader():
             x, y = load_sample(config.test_folder_path, sample_name)
             x_test.append(x)
             y_test.append(y)
+        # one hot encoding    
+        y_train = make_one_host(y_train)
+        y_test = make_one_host(y_test)
+        # convert to numpy array
+        self.x_train = np.array(x_train)
+        self.x_test = np.array(x_test)
+        self.y_train = np.array(y_train)
+        self.y_test = np.array(y_test)
+
+    def load_datasets_random(self, num_image):
+        x_train = []
+        y_train = []
+        x_test  = []
+        y_test  = []
+        
+        num_image = int(num_image * 3 / 2)
+        if num_image > self.dict_lables["num_train"]:
+            num_image = self.dict_lables["num_train"]
+        list_samples = os.listdir(config.train_folder_path)
+        
+        list_chosed = random.sample(list_samples, int(num_image))
+        num_train = int(num_image / 3 * 2)
+        count_train = 0
+        for sample_name in list_chosed:
+            x,y = load_sample(config.train_folder_path, sample_name)
+            if count_train < num_train:
+                x_train.append(x)
+                y_train.append(y)
+                count_train += 1
+            else:
+                x_test.append(x)
+                y_test.append(y)
+
         # one hot encoding    
         y_train = make_one_host(y_train)
         y_test = make_one_host(y_test)
@@ -80,7 +113,9 @@ class DatasetLoader():
         return self.dict_lables["num_type"]
     
     def get_num_train(self):
-        return self.dict_lables["num_train"]
+        num_train = self.y_train.shape[0]
+        num_test = self.y_test.shape[0]
+        return num_train
     
     def get_num_test(self):
         return self.dict_lables["num_test"]

@@ -3,12 +3,20 @@ import tensorflow as tf
 import time
 from dataset_loader import DatasetLoader
 import network_config as config
+from cnn_layers import Layers
 
 # Datasets
 dataset  = DatasetLoader()
 
+# Layers
+layers = Layers()
+
 # Save model
 model_save_name= "cnn_model/"
+
+# Config trainning
+num_epochs = 50
+batch_size = 100
 
 # Model parameters
 image_width = config.image_width
@@ -16,96 +24,61 @@ image_height = config.image_height
 image_channel = config.image_channel
 image_types = dataset.get_num_types()
 
-# Placeholder variables
 # Placeholder variable for the input images
 x_train = tf.placeholder(tf.float32, shape=[None, image_width, image_height, image_channel], name='x_train')
 # Placeholder variable for the true labels associated with the images
 y_true = tf.placeholder(tf.float32, shape=[None, image_types], name='y_true')
 
-# Function creating new convolution layer
-def new_conv_layer(input, num_input_channels, filter_size, num_filters, name):
-    with tf.variable_scope(name) as scope:
-        # Shape of the filter-weights for the convolution
-        shape = [filter_size, filter_size, num_input_channels, num_filters]
-        # Create new weights (filters) with the given shape
-        weights = tf.Variable(tf.truncated_normal(shape, stddev=0.05))
-        # Create new biases, one for each filter
-        biases = tf.Variable(tf.constant(0.05, shape=[num_filters]))
-        # TensorFlow operation for convolution
-        layer = tf.nn.conv2d(input=input, filter=weights, strides=[1, 1, 1, 1], padding='SAME')
-        # Add the biases to the results of the convolution.
-        layer += biases
-        return layer, weights
-
-# Function creating pooling layer
-def new_pool_layer(input, name):
-    with tf.variable_scope(name) as scope:
-        # TensorFlow operation for convolution
-        layer = tf.nn.max_pool(value=input, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
-        return layer
-
-# Function creating relu layer
-def new_relu_layer(input, name):
-    with tf.variable_scope(name) as scope:
-        # TensorFlow operation for convolution
-        layer = tf.nn.relu(input)
-        return layer
-
-# Function creating fully connected layer
-def new_fc_layer(input, num_inputs, num_outputs, name):
-    with tf.variable_scope(name) as scope:
-        # Create new weights and biases.
-        weights = tf.Variable(tf.truncated_normal([num_inputs, num_outputs], stddev=0.05))
-        biases = tf.Variable(tf.constant(0.05, shape=[num_outputs]))
-        # Multiply the input and weights, and then add the bias-values.
-        layer = tf.matmul(input, weights) + biases
-        return layer
-
-# Create Convolutional Neural Network
 # Convolutional Layer 1
-layer_conv1, weights_conv1 = new_conv_layer(input=x_train, num_input_channels= image_channel, filter_size=5, num_filters=6, name ="conv1")
+layer_conv1, weights_conv1 = layers.new_conv_layer(input_tensor=x_train, input_channel= image_channel, 
+filter_size=5, filter_num=8, filter_stride=[1, 1, 1, 1], filter_padding="SAME",name ="conv1")
 print(layer_conv1)
 # Pooling Layer 1
-layer_pool1 = new_pool_layer(layer_conv1, name="pool1")
-print(layer_pool1)
+layer_conv1 = layers.new_pool_layer(input_tensor=layer_conv1, 
+ker_size=[1, 2, 2, 1], ker_stride=[1, 2, 2, 1], ker_padding="SAME",name="pool1")
+print(layer_conv1)
 # RelU layer 1
-layer_relu1 = new_relu_layer(layer_pool1, name="relu1")
-print(layer_relu1)
+layer_conv1 = layers.new_relu_layer(layer_conv1, name="relu1")
+print(layer_conv1)
 
 # Convolutional Layer 2
-layer_conv2, weights_conv2 = new_conv_layer(input=layer_relu1, num_input_channels=6, filter_size=5, num_filters=16, name= "conv2")
+layer_conv2, weights_conv2 = layers.new_conv_layer(input_tensor=layer_conv1, input_channel= 8, 
+filter_size=5, filter_num=16, filter_stride=[1, 1, 1, 1], filter_padding="SAME",name ="conv2")
 print(layer_conv2)
 # Pooling Layer 2
-layer_pool2 = new_pool_layer(layer_conv2, name="pool2")
-print(layer_pool2)
+layer_conv2 = layers.new_pool_layer(input_tensor=layer_conv2, 
+ker_size=[1, 2, 2, 1], ker_stride=[1, 2, 2, 1], ker_padding="SAME",name="pool2")
+print(layer_conv2)
 # RelU layer 2
-layer_relu2 = new_relu_layer(layer_pool2, name="relu2")
-print(layer_relu2)
+layer_relu1 = layers.new_relu_layer(layer_conv2, name="relu2")
+print(layer_relu1)
 
 # Convolutional Layer 3
-layer_conv3, weights_conv3 = new_conv_layer(input=layer_relu2, num_input_channels=16, filter_size=5, num_filters=32, name= "conv3")
+layer_conv3, weights_conv3 = layers.new_conv_layer(input_tensor=layer_conv2, input_channel= 16, 
+filter_size=5, filter_num=32, filter_stride=[1, 1, 1, 1], filter_padding="SAME",name ="conv3")
 print(layer_conv3)
 # Pooling Layer 3
-layer_pool3 = new_pool_layer(layer_conv3, name="pool3")
-print(layer_pool3)
+layer_conv3 = layers.new_pool_layer(input_tensor=layer_conv3, 
+ker_size=[1, 2, 2, 1], ker_stride=[1, 2, 2, 1], ker_padding="SAME",name="pool3")
+print(layer_conv3)
 # RelU layer 3
-layer_relu3 = new_relu_layer(layer_pool3, name="relu3")
-print(layer_relu3)
+layer_conv3 = layers.new_relu_layer(layer_conv3, name="relu3")
+print(layer_conv3)
 
 # Flatten Layer
-num_features = layer_relu3.get_shape()[1:4].num_elements()
-layer_flat = tf.reshape(layer_relu3, [-1, num_features])
+num_features = layer_conv3.get_shape()[1:4].num_elements()
+layer_flat = tf.reshape(layer_conv3, [-1, num_features])
 print(layer_flat)
 
 # Fully-Connected Layer 1
-layer_fc1 = new_fc_layer(layer_flat, num_inputs=num_features, num_outputs=128, name="fc1")
+layer_fc1 = layers.new_fc_layer(layer_flat, num_inputs=num_features, num_outputs=128, name="fc1")
 print(layer_fc1)
-# RelU layer 3
-layer_relu3 = new_relu_layer(layer_fc1, name="relu3")
-print(layer_relu3)
+# RelU layer 4
+layer_relu4 = layers.new_relu_layer(layer_fc1, name="relu4")
+print(layer_relu4)
 
 # Fully-Connected Layer 2
-layer_output = new_fc_layer(input=layer_relu3, num_inputs=128, num_outputs=image_types, name="fc2")
+layer_output = layers.new_fc_layer(input=layer_relu4, num_inputs=128, num_outputs=image_types, name="fc2")
 print(layer_output)
 
 # Use Softmax function to normalize the output
@@ -137,11 +110,6 @@ tf.summary.scalar('accuracy', accuracy)
 # Merge all summaries together
 merged_summary = tf.summary.merge_all()
 
-
-num_epochs = 50
-batch_size = 100
-
-
 # TensorFlow Session
 with tf.Session() as sess:
     # Saver
@@ -152,6 +120,7 @@ with tf.Session() as sess:
     writer_train.add_graph(sess.graph)
     # Loop over number of epochs
     for epoch in range(num_epochs):
+        dataset.load_datasets_random(3000)
         start_time = time.time()
         train_accuracy = 0
         for batch in range(0, int(dataset.get_num_train()/batch_size)):

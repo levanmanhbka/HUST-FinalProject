@@ -1,6 +1,14 @@
 import tensorflow as tf
 import time
 from dataset_loader import DatasetLoader
+from cnn_layers import Layers
+import network_config as config
+
+# Layer
+layers = Layers()
+
+# Datasets
+dataset  = DatasetLoader()
 
 # General parameters of the model
 NUM_EPOCHS = 50
@@ -12,145 +20,141 @@ ALPHA = 1e-4
 BETA = 0.75
 
 # Global dataset dictionary
-dataset_dict = {
-    "image_size": 228,
-    "num_channels": 3,
-    "num_labels": 4,
-}
+image_width = config.image_width
+image_height = config.image_height
+image_channel = config.image_channel
+image_types = dataset.get_num_types()
 
-# Filter shapes for each layer 
-conv_filter_shapes = {
-    "c1_filter": [11, 11, 3, 96],
-    "c2_filter": [5, 5, 96, 256],
-    "c3_filter": [3, 3, 256, 384],
-    "c4_filter": [3, 3, 384, 384],
-    "c5_filter": [3, 3, 384, 256]
-}
+model_save_name= "alex_model/"
 
-# Fully connected shapes
-fc_connection_shapes = {
-    "f1_shape": [6*6*256, 4096],
-    "f2_shape": [4096, 4096],
-    "f3_shape": [4096, dataset_dict["num_labels"]]
-}
-
-# Weights for each layer
-conv_weights = {
-    "c1_weights": tf.Variable(tf.truncated_normal(conv_filter_shapes["c1_filter"], stddev=0.05, dtype=tf.float32), name="c1_weights"),
-    "c2_weights": tf.Variable(tf.truncated_normal(conv_filter_shapes["c2_filter"], stddev=0.05, dtype=tf.float32), name="c2_weights"),
-    "c3_weights": tf.Variable(tf.truncated_normal(conv_filter_shapes["c3_filter"], stddev=0.05, dtype=tf.float32), name="c3_weights"),
-    "c4_weights": tf.Variable(tf.truncated_normal(conv_filter_shapes["c4_filter"], stddev=0.05, dtype=tf.float32), name="c4_weights"),
-    "c5_weights": tf.Variable(tf.truncated_normal(conv_filter_shapes["c5_filter"], stddev=0.05, dtype=tf.float32), name="c5_weights"),
-    "f1_weights": tf.Variable(tf.truncated_normal(fc_connection_shapes["f1_shape"], stddev=0.05, dtype=tf.float32), name="f1_weights"),
-    "f2_weights": tf.Variable(tf.truncated_normal(fc_connection_shapes["f2_shape"], stddev=0.05, dtype=tf.float32), name="f2_weights"),
-    "f3_weights": tf.Variable(tf.truncated_normal(fc_connection_shapes["f3_shape"], stddev=0.05, dtype=tf.float32), name="f3_weights")
-}
-
-# Biases for each layer
-conv_biases = {
-    "c1_biases": tf.Variable(tf.truncated_normal([conv_filter_shapes["c1_filter"][3]], dtype=tf.float32), name="c1_biases"),
-    "c2_biases": tf.Variable(tf.truncated_normal([conv_filter_shapes["c2_filter"][3]], dtype=tf.float32), name="c2_biases"), 
-    "c3_biases": tf.Variable(tf.truncated_normal([conv_filter_shapes["c3_filter"][3]], dtype=tf.float32), name="c3_biases"),
-    "c4_biases": tf.Variable(tf.truncated_normal([conv_filter_shapes["c4_filter"][3]], dtype=tf.float32), name="c4_biases"),
-    "c5_biases": tf.Variable(tf.truncated_normal([conv_filter_shapes["c5_filter"][3]], dtype=tf.float32), name="c5_biases"),
-    "f1_biases": tf.Variable(tf.truncated_normal([fc_connection_shapes["f1_shape"][1]], stddev=0.05, dtype=tf.float32), name="f1_biases"),
-    "f2_biases": tf.Variable(tf.truncated_normal([fc_connection_shapes["f2_shape"][1]], stddev=0.05, dtype=tf.float32), name="f2_biases"),
-    "f3_biases": tf.Variable(tf.truncated_normal([fc_connection_shapes["f3_shape"][1]], stddev=0.05, dtype=tf.float32), name="f3_biases")
-}
-
-# Declare the input and output placeholders
-input_img = tf.placeholder(tf.float32, shape=[None, dataset_dict["image_size"], dataset_dict["image_size"], dataset_dict["num_channels"]])
-labels = tf.placeholder(tf.float32, shape=[None, dataset_dict["num_labels"]])
+# Placeholder variable for the input images
+x_train = tf.placeholder(tf.float32, shape=[None, image_width, image_height, image_channel], name='x_train')
+# Placeholder variable for the true labels associated with the images
+y_true = tf.placeholder(tf.float32, shape=[None, image_types], name='y_true')
 
 # Convolution Layer 1 | Response Normalization | Max Pooling | ReLU
-c_layer_1 = tf.nn.conv2d(input_img, conv_weights["c1_weights"], strides=[1, 4, 4, 1], padding="VALID", name="c_layer_1")
-c_layer_1 += conv_biases["c1_biases"]
-c_layer_1 = tf.nn.relu(c_layer_1)
-c_layer_1 = tf.nn.lrn(c_layer_1, depth_radius=N_DEPTH_RADIUS, bias=K_BIAS, alpha=ALPHA, beta=BETA)
-c_layer_1 = tf.nn.max_pool(c_layer_1, ksize=[1, 3, 3, 1], strides=[1, 2, 2, 1], padding="SAME", name = "max_pool_1")
-print(c_layer_1)
+print("Convolutional Layer 1")
+layer_conv1, weights_conv1 = layers.new_conv_layer(input_tensor=x_train, input_channel= image_channel, 
+filter_size=11, filter_num=96, filter_stride=[1, 4, 4, 1], filter_padding="VALID",name ="conv1")
+print(layer_conv1)
+# Normalize layer 1
+layer_conv1 = tf.nn.lrn(layer_conv1, depth_radius=N_DEPTH_RADIUS, bias=K_BIAS, alpha=ALPHA, beta=BETA)
+print(layer_conv1)
+# Pooling layer 1
+layer_conv1 = layers.new_pool_layer(input_tensor=layer_conv1, 
+ker_size=[1, 3, 3, 1], ker_stride=[1, 2, 2, 1], ker_padding="VALID",name="pool1")
+print(layer_conv1)
+# RelU layer 1
+layer_conv1 = layers.new_relu_layer(layer_conv1, name="relu1")
+print(layer_conv1)
 
 # Convolution Layer 2 | Response Normalization | Max Pooling | ReLU
-c_layer_2 = tf.nn.conv2d(c_layer_1, conv_weights["c2_weights"], strides=[1, 1, 1, 1], padding="VALID", name="c_layer_2")
-c_layer_2 += conv_biases["c2_biases"]
-c_layer_2 = tf.nn.relu(c_layer_2)
-c_layer_2 = tf.nn.lrn(c_layer_2, depth_radius=5, bias=K_BIAS, alpha=ALPHA, beta=BETA)
-c_layer_2 = tf.nn.max_pool(c_layer_2, ksize=[1, 3, 3, 1], strides=[1, 2, 2, 1], padding="VALID", name = "max_pool_2")
-print(c_layer_2)
+print("Convolutional Layer 2")
+layer_conv2, weights_conv2 = layers.new_conv_layer(input_tensor=layer_conv1, input_channel= 96, 
+filter_size=5, filter_num=256, filter_stride=[1, 1, 1, 1], filter_padding="SAME",name ="conv2")
+print(layer_conv2)
+# Normalize layer 2
+layer_conv2 = tf.nn.lrn(layer_conv2, depth_radius=N_DEPTH_RADIUS, bias=K_BIAS, alpha=ALPHA, beta=BETA)
+print(layer_conv2)
+# Pooling layer 2
+layer_conv2 = layers.new_pool_layer(input_tensor=layer_conv2, 
+ker_size=[1, 3, 3, 1], ker_stride=[1, 2, 2, 1], ker_padding="VALID",name="pool2")
+print(layer_conv2)
+# RelU layer 2
+layer_conv2 = layers.new_relu_layer(layer_conv2, name="relu2")
+print(layer_conv2)
 
 # Convolution Layer 3 | ReLU
-c_layer_3 = tf.nn.conv2d(c_layer_2, conv_weights["c3_weights"], strides=[1, 1, 1, 1], padding="SAME", name="c_layer_3")
-c_layer_3 += conv_biases["c3_biases"]
-c_layer_3 = tf.nn.relu(c_layer_3)
-print(c_layer_3)
+print("Convolutional Layer 3")
+layer_conv3, weights_conv3 = layers.new_conv_layer(input_tensor=layer_conv2, input_channel= 256, 
+filter_size=3, filter_num=384, filter_stride=[1, 1, 1, 1], filter_padding="SAME", name ="conv3")
+print(layer_conv3)
+# RelU layer 3
+layer_conv3 = layers.new_relu_layer(layer_conv3, name="relu3")
+print(layer_conv3)
 
 # Convolution Layer 4 | ReLU
-c_layer_4 = tf.nn.conv2d(c_layer_3, conv_weights["c4_weights"], strides=[1, 1, 1, 1], padding="SAME", name="c_layer_4")
-c_layer_4 += conv_biases["c4_biases"]
-c_layer_4 = tf.nn.relu(c_layer_4)
-print(c_layer_4)
+print("Convolutional Layer 4")
+layer_conv4, weights_conv4 = layers.new_conv_layer(input_tensor=layer_conv3, input_channel= 384, 
+filter_size=3, filter_num=384, filter_stride=[1, 1, 1, 1], filter_padding="SAME", name ="conv4")
+print(layer_conv4)
+# RelU layer 3
+layer_conv4 = layers.new_relu_layer(layer_conv4, name="relu4")
+print(layer_conv4)
 
 # Convolution Layer 5 | ReLU | Max Pooling
-c_layer_5 = tf.nn.conv2d(c_layer_4, conv_weights["c5_weights"], strides=[1, 1, 1, 1], padding="SAME", name="c_layer_5")
-c_layer_5 += conv_biases["c5_biases"]
-c_layer_5 = tf.nn.relu(c_layer_5)
-c_layer_5 = tf.nn.max_pool(c_layer_5, ksize=[1, 3, 3, 1], strides=[1, 2, 2, 1], padding="SAME", name = "max_pool_5")
-print(c_layer_5)
+print("Convolutional Layer 5")
+layer_conv5, weights_conv5 = layers.new_conv_layer(input_tensor=layer_conv4, input_channel= 384, 
+filter_size=3, filter_num=256, filter_stride=[1, 1, 1, 1], filter_padding="SAME", name ="conv5")
+print(layer_conv5)
+# RelU layer 3
+layer_conv5 = layers.new_relu_layer(layer_conv5, name="relu5")
+print(layer_conv5)
+# Pooling layer 2
+layer_conv5 = layers.new_pool_layer(input_tensor=layer_conv5, 
+ker_size=[1, 3, 3, 1], ker_stride=[1, 2, 2, 1], ker_padding="SAME",name="pool5")
+print(layer_conv5)
 
-# Flatten the multi-dimensional outputs to feed fully connected layers
-feature_map = tf.reshape(c_layer_5, [-1, 6 * 6 * 256])
+# Flatten Layer
+print("flattent layer")
+num_features = layer_conv5.get_shape()[1:4].num_elements()
+feature_map = tf.reshape(layer_conv5, [-1, num_features])
 print(feature_map)
 
 # Fully Connected Layer 1 | Dropout
-fc_layer_1 = tf.matmul(feature_map, conv_weights["f1_weights"]) + conv_biases["f1_biases"]
+fc_layer_1 = layers.new_fc_layer(input=feature_map, num_inputs=num_features, num_outputs= 4096, name="fc_layer1")
 fc_layer_1 = tf.nn.dropout(fc_layer_1, keep_prob=DROPOUT_KEEP_PROB)
 print(fc_layer_1)
 
 # Fully Connected Layer 2 | Dropout
-fc_layer_2 = tf.matmul(fc_layer_1, conv_weights["f2_weights"]) + conv_biases["f2_biases"]
+fc_layer_2 = layers.new_fc_layer(input=fc_layer_1, num_inputs=4096, num_outputs= 4096, name="fc_layer2")
 fc_layer_2 = tf.nn.dropout(fc_layer_2, keep_prob=DROPOUT_KEEP_PROB)
 print(fc_layer_2)
 
 # Fully Connected Layer 3 | Softmax
-fc_layer_3 = tf.matmul(fc_layer_2, conv_weights["f3_weights"]) + conv_biases["f3_biases"]
-cnn_output = tf.nn.softmax(fc_layer_3)
-print(cnn_output)
+fc_layer_3 = layers.new_fc_layer(input=fc_layer_1, num_inputs=4096, num_outputs= image_types, name="fc_layer2")
+print(fc_layer_3)
 
 
 #--------------------------- Training model -------------------------#
-
-y_pred = cnn_output
+y_pred = tf.nn.softmax(fc_layer_3)
 
 # Define loss and optimizer
-cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits = fc_layer_3, labels= labels))
+cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits = fc_layer_3, labels= y_true))
 optimizer = tf.train.AdamOptimizer(learning_rate=1e-4).minimize(cost)
 
 # Evaluate model
-correct_pred = tf.equal(tf.argmax(y_pred, 1), tf.argmax(labels, 1))
+correct_pred = tf.equal(tf.argmax(y_pred, 1), tf.argmax(y_true, 1))
 accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 
 # Datasets
 dataset  = DatasetLoader()
 
 with tf.Session() as sess:
+     # Saver
+    saver = tf.train.Saver(max_to_keep=4)
     # Initialize the variables
     sess.run(tf.global_variables_initializer())
     # Loop over number of eporchs
-    train_accuracy = 0.0
     for epoch in range(NUM_EPOCHS):
+        dataset.load_datasets_random(3000)
         start_time = time.time()
+        train_accuracy = 0.0
         for batch in range(0, int(dataset.get_num_train()/BATCH_SIZE)):
             # Get a batch of images and labels
             x_batch, y_batch = dataset.load_batch_dataset(BATCH_SIZE)
             # Put the batch into a dict with the proper names for placeholder variables
-            feed_dict_train = {input_img: x_batch, labels: y_batch}
+            feed_dict_train = {x_train: x_batch, y_true: y_batch}
             # Run the optimizer using this batch of training data.
             sess.run(optimizer, feed_dict=feed_dict_train)
             # Calculate the accuracy on the batch of training data
             train_accuracy += sess.run(accuracy, feed_dict=feed_dict_train)
+        
+        saver.save(sess, model_save_name)
+        
         train_accuracy = train_accuracy / (dataset.get_num_train()/BATCH_SIZE)
         # Validate the model on the entire validation set
-        vali_accuracy = sess.run(accuracy, feed_dict={input_img:dataset.x_test, labels:dataset.y_test})
+        vali_accuracy = sess.run(accuracy, feed_dict={x_train:dataset.x_test, y_true:dataset.y_test})
         end_time = time.time()
         print("Epoch "+str(epoch+1)+" completed : Time usage "+str(int(end_time-start_time))+" seconds")
         print("\tAccuracy:")
