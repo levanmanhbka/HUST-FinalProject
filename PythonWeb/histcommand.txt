@@ -1,0 +1,641 @@
+
+D:\AI\HUST-FinalProject\PythonWeb>python manage.py makemigrations predict
+Migrations for 'predict':
+  predict\migrations\0001_initial.py
+    - Create model Post
+
+D:\AI\HUST-FinalProject\PythonWeb>python manage.py migrate
+Operations to perform:
+  Apply all migrations: admin, auth, contenttypes, predict, sessions
+Running migrations:
+  Applying predict.0001_initial... OK
+
+D:\AI\HUST-FinalProject\PythonWeb>python manage.py makemigrations predict
+You are trying to add a non-nullable field 'image' to post without a default; we can't do that (the database needs something to populate existing rows).
+Please select a fix:
+ 1) Provide a one-off default now (will be set on all existing rows with a null value for this column)
+ 2) Quit, and let me add a default in models.py
+Select an option: 2
+Traceback (most recent call last):
+  File "manage.py", line 21, in <module>
+    main()
+  File "manage.py", line 17, in main
+    execute_from_command_line(sys.argv)
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\core\management\__init__.py", line 381, in execute_from_command_line
+    utility.execute()
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\core\management\__init__.py", line 375, in execute
+    self.fetch_command(subcommand).run_from_argv(self.argv)
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\core\management\base.py", line 323, in run_from_argv
+    self.execute(*args, **cmd_options)
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\core\management\base.py", line 364, in execute
+    output = self.handle(*args, **options)
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\core\management\base.py", line 83, in wrapped
+    res = handle_func(*args, **kwargs)
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\core\management\commands\makemigrations.py", line 168, in handle
+    migration_name=self.migration_name,
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\db\migrations\autodetector.py", line 43, in changes
+    changes = self._detect_changes(convert_apps, graph)
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\db\migrations\autodetector.py", line 185, in _detect_changes
+    self.generate_added_fields()
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\db\migrations\autodetector.py", line 850, in generate_added_fields
+    self._generate_added_field(app_label, model_name, field_name)
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\db\migrations\autodetector.py", line 871, in _generate_added_field
+    field.default = self.questioner.ask_not_null_addition(field_name, model_name)
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\db\migrations\questioner.py", line 153, in ask_not_null_addition
+    "Quit, and let me add a default in models.py",
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\db\migrations\questioner.py", line 98, in _choice_input
+    result = input("Select an option: ")
+KeyboardInterrupt
+
+D:\AI\HUST-FinalProject\PythonWeb>python manage.py makemigrations predict
+You are trying to add a non-nullable field 'image' to post without a default; we can't do that (the database needs something to populate existing rows).
+Please select a fix:
+ 1) Provide a one-off default now (will be set on all existing rows with a null value for this column)
+ 2) Quit, and let me add a default in models.py
+Select an option: 1
+Please enter the default value now, as valid Python
+The datetime and django.utils.timezone modules are available, so you can do e.g. timezone.now
+Type 'exit' to exit this prompt
+>>> null
+Invalid input: name 'null' is not defined
+>>> ""
+Migrations for 'predict':
+  predict\migrations\0002_post_image.py
+    - Add field image to post
+
+D:\AI\HUST-FinalProject\PythonWeb>python manage.py migrate
+Operations to perform:
+  Apply all migrations: admin, auth, contenttypes, predict, sessions
+Running migrations:
+  Applying predict.0002_post_image... OK
+
+D:\AI\HUST-FinalProject\PythonWeb>python manage.py shell
+Python 3.7.2 (tags/v3.7.2:9a3ffc0492, Dec 23 2018, 23:09:28) [MSC v.1916 64 bit (AMD64)]
+Type 'copyright', 'credits' or 'license' for more information
+IPython 7.4.0 -- An enhanced Interactive Python. Type '?' for help.
+
+In [1]: from predict.models import Post
+
+In [2]: a = Post()
+
+In [3]: a. title = "First title"
+
+In [4]: a. body = "Hello world"
+
+In [5]: a.save()
+
+In [6]: Post.ogjects.all()
+---------------------------------------------------------------------------
+AttributeError                            Traceback (most recent call last)
+<ipython-input-6-b0852bb33d6c> in <module>
+----> 1 Post.ogjects.all()
+
+AttributeError: type object 'Post' has no attribute 'ogjects'
+
+In [7]: Post.opjects.all()
+---------------------------------------------------------------------------
+AttributeError                            Traceback (most recent call last)
+<ipython-input-7-4f99a33f4b55> in <module>
+----> 1 Post.opjects.all()
+
+AttributeError: type object 'Post' has no attribute 'opjects'
+
+In [8]: Post.objects.all()
+Out[8]: <QuerySet [<Post: Post object (1)>]>
+
+In [9]: Post.objects.all()
+Out[9]: <QuerySet [<Post: Post object (1)>]>
+
+In [10]: exit()
+
+D:\AI\HUST-FinalProject\PythonWeb>python manage.py shell
+Python 3.7.2 (tags/v3.7.2:9a3ffc0492, Dec 23 2018, 23:09:28) [MSC v.1916 64 bit (AMD64)]
+Type 'copyright', 'credits' or 'license' for more information
+IPython 7.4.0 -- An enhanced Interactive Python. Type '?' for help.
+
+In [1]: Post.objects.all()
+---------------------------------------------------------------------------
+NameError                                 Traceback (most recent call last)
+<ipython-input-1-09ba15aa7345> in <module>
+----> 1 Post.objects.all()
+
+NameError: name 'Post' is not defined
+
+In [2]: from predict.models import Post
+
+In [3]: Post.objects.all()
+Out[3]: <QuerySet [<Post: First title>]>
+
+In [4]: exit()
+
+D:\AI\HUST-FinalProject\PythonWeb>python manage.py createsuperuser
+Username (leave blank to use 'admin'): levanmanhbka
+Email address: levanmanhbka@gmail.com
+Password:
+Password (again):
+Superuser created successfully.
+
+D:\AI\HUST-FinalProject\PythonWeb>python manage.py runserver 192.168.100.9:8000
+Watching for file changes with StatReloader
+Performing system checks...
+
+System check identified no issues (0 silenced).
+May 14, 2019 - 22:33:58
+Django version 2.2.1, using settings 'PythonWeb.settings'
+Starting development server at http://192.168.100.9:8000/
+Quit the server with CTRL-BREAK.
+[14/May/2019 22:34:03] "GET /admin HTTP/1.1" 301 0
+[14/May/2019 22:34:03] "GET /admin/ HTTP/1.1" 302 0
+[14/May/2019 22:34:03] "GET /admin/login/?next=/admin/ HTTP/1.1" 200 1819
+[14/May/2019 22:34:03] "GET /static/admin/css/base.css HTTP/1.1" 200 16378
+[14/May/2019 22:34:03] "GET /static/admin/css/responsive.css HTTP/1.1" 200 17944
+[14/May/2019 22:34:03] "GET /static/admin/css/login.css HTTP/1.1" 200 1233
+[14/May/2019 22:34:03] "GET /static/admin/css/fonts.css HTTP/1.1" 200 423
+[14/May/2019 22:34:03] "GET /static/admin/fonts/Roboto-Light-webfont.woff HTTP/1.1" 200 85692
+[14/May/2019 22:34:03] "GET /static/admin/fonts/Roboto-Regular-webfont.woff HTTP/1.1" 200 85876
+[14/May/2019 22:34:11] "POST /admin/login/?next=/admin/ HTTP/1.1" 302 0
+[14/May/2019 22:34:11] "GET /admin/ HTTP/1.1" 200 3049
+[14/May/2019 22:34:11] "GET /static/admin/css/dashboard.css HTTP/1.1" 200 412
+[14/May/2019 22:34:12] "GET /static/admin/img/icon-changelink.svg HTTP/1.1" 200 380
+[14/May/2019 22:34:12] "GET /static/admin/img/icon-addlink.svg HTTP/1.1" 200 331
+[14/May/2019 22:34:12] "GET /static/admin/fonts/Roboto-Bold-webfont.woff HTTP/1.1" 200 86184
+[14/May/2019 22:34:17] "GET /admin/auth/user/ HTTP/1.1" 200 6630
+[14/May/2019 22:34:17] "GET /static/admin/css/changelists.css HTTP/1.1" 200 6170
+[14/May/2019 22:34:17] "GET /static/admin/js/jquery.init.js HTTP/1.1" 200 363
+[14/May/2019 22:34:17] "GET /admin/jsi18n/ HTTP/1.1" 200 3223
+[14/May/2019 22:34:17] "GET /static/admin/js/prepopulate.js HTTP/1.1" 200 1530
+[14/May/2019 22:34:17] "GET /static/admin/js/urlify.js HTTP/1.1" 200 8972
+[14/May/2019 22:34:17] "GET /static/admin/js/actions.js HTTP/1.1" 200 6538
+[14/May/2019 22:34:17] "GET /static/admin/js/core.js HTTP/1.1" 200 7135
+[14/May/2019 22:34:17] "GET /static/admin/img/search.svg HTTP/1.1" 200 458
+[14/May/2019 22:34:17] "GET /static/admin/js/vendor/xregexp/xregexp.js HTTP/1.1" 200 128820
+[14/May/2019 22:34:17] "GET /static/admin/js/admin/RelatedObjectLookups.js HTTP/1.1" 200 6918
+[14/May/2019 22:34:17] "GET /static/admin/img/icon-yes.svg HTTP/1.1" 200 436
+[14/May/2019 22:34:17] "GET /static/admin/js/vendor/jquery/jquery.js HTTP/1.1" 200 271751
+[14/May/2019 22:34:17] "GET /static/admin/img/tooltag-add.svg HTTP/1.1" 200 331
+[14/May/2019 22:34:17] "GET /static/admin/img/sorting-icons.svg HTTP/1.1" 200 1097
+[14/May/2019 22:34:28] "GET /admin/ HTTP/1.1" 200 3049
+D:\AI\HUST-FinalProject\PythonWeb\predict\admin.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+System check identified no issues (0 silenced).
+May 14, 2019 - 22:35:02
+Django version 2.2.1, using settings 'PythonWeb.settings'
+Starting development server at http://192.168.100.9:8000/
+Quit the server with CTRL-BREAK.
+D:\AI\HUST-FinalProject\PythonWeb\predict\admin.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+System check identified no issues (0 silenced).
+May 14, 2019 - 22:35:23
+Django version 2.2.1, using settings 'PythonWeb.settings'
+Starting development server at http://192.168.100.9:8000/
+Quit the server with CTRL-BREAK.
+D:\AI\HUST-FinalProject\PythonWeb\predict\admin.py changed, reloading.
+Watching for file changes with StatReloader
+Exception in thread django-main-thread:
+Traceback (most recent call last):
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\threading.py", line 917, in _bootstrap_inner
+    self.run()
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\threading.py", line 865, in run
+    self._target(*self._args, **self._kwargs)
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\utils\autoreload.py", line 54, in wrapper
+    fn(*args, **kwargs)
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\core\management\commands\runserver.py", line 109, in inner_run
+    autoreload.raise_last_exception()
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\utils\autoreload.py", line 77, in raise_last_exception
+    raise _exception[0](_exception[1]).with_traceback(_exception[2])
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\utils\autoreload.py", line 54, in wrapper
+    fn(*args, **kwargs)
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\__init__.py", line 24, in setup
+    apps.populate(settings.INSTALLED_APPS)
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\apps\registry.py", line 122, in populate
+    app_config.ready()
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\contrib\admin\apps.py", line 24, in ready
+    self.module.autodiscover()
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\contrib\admin\__init__.py", line 26, in autodiscover
+    autodiscover_modules('admin', register_to=site)
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\utils\module_loading.py", line 47, in autodiscover_modules
+    import_module('%s.%s' % (app_config.name, module_to_search))
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\importlib\__init__.py", line 127, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1006, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 983, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 967, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 677, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 728, in exec_module
+  File "<frozen importlib._bootstrap>", line 219, in _call_with_frames_removed
+  File "D:\AI\HUST-FinalProject\PythonWeb\predict\admin.py", line 2, in <module>
+    from models import Post
+ModuleNotFoundError: No module named 'models'
+
+
+D:\AI\HUST-FinalProject\PythonWeb>python manage.py runserver 192.168.100.9:8000
+Watching for file changes with StatReloader
+Performing system checks...
+
+System check identified no issues (0 silenced).
+May 14, 2019 - 22:36:10
+Django version 2.2.1, using settings 'PythonWeb.settings'
+Starting development server at http://192.168.100.9:8000/
+Quit the server with CTRL-BREAK.
+[14/May/2019 22:36:15] "GET /admin/ HTTP/1.1" 200 3722
+[14/May/2019 22:36:16] "GET /admin/predict/post/ HTTP/1.1" 200 4327
+[14/May/2019 22:36:16] "GET /admin/jsi18n/ HTTP/1.1" 200 3223
+[14/May/2019 22:36:21] "GET /admin/predict/post/1/change/ HTTP/1.1" 200 5214
+[14/May/2019 22:36:21] "GET /admin/jsi18n/ HTTP/1.1" 200 3223
+[14/May/2019 22:36:21] "GET /static/admin/css/forms.css HTTP/1.1" 200 8518
+[14/May/2019 22:36:21] "GET /static/admin/js/change_form.js HTTP/1.1" 200 712
+[14/May/2019 22:36:21] "GET /static/admin/js/prepopulate_init.js HTTP/1.1" 200 495
+[14/May/2019 22:36:21] "GET /static/admin/css/widgets.css HTTP/1.1" 200 10340
+D:\AI\HUST-FinalProject\PythonWeb\predict\admin.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+System check identified no issues (0 silenced).
+May 14, 2019 - 22:38:23
+Django version 2.2.1, using settings 'PythonWeb.settings'
+Starting development server at http://192.168.100.9:8000/
+Quit the server with CTRL-BREAK.
+D:\AI\HUST-FinalProject\PythonWeb\predict\admin.py changed, reloading.
+Watching for file changes with StatReloader
+Exception in thread django-main-thread:
+Traceback (most recent call last):
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\threading.py", line 917, in _bootstrap_inner
+    self.run()
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\threading.py", line 865, in run
+    self._target(*self._args, **self._kwargs)
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\utils\autoreload.py", line 54, in wrapper
+    fn(*args, **kwargs)
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\core\management\commands\runserver.py", line 109, in inner_run
+    autoreload.raise_last_exception()
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\utils\autoreload.py", line 77, in raise_last_exception
+    raise _exception[0](_exception[1]).with_traceback(_exception[2])
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\utils\autoreload.py", line 54, in wrapper
+    fn(*args, **kwargs)
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\__init__.py", line 24, in setup
+    apps.populate(settings.INSTALLED_APPS)
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\apps\registry.py", line 122, in populate
+    app_config.ready()
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\contrib\admin\apps.py", line 24, in ready
+    self.module.autodiscover()
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\contrib\admin\__init__.py", line 26, in autodiscover
+    autodiscover_modules('admin', register_to=site)
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\utils\module_loading.py", line 47, in autodiscover_modules
+    import_module('%s.%s' % (app_config.name, module_to_search))
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\importlib\__init__.py", line 127, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1006, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 983, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 967, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 677, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 728, in exec_module
+  File "<frozen importlib._bootstrap>", line 219, in _call_with_frames_removed
+  File "D:\AI\HUST-FinalProject\PythonWeb\predict\admin.py", line 6, in <module>
+    admin.site.register(PostAdmin)
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\contrib\admin\sites.py", line 102, in register
+    for model in model_or_iterable:
+TypeError: 'MediaDefiningClass' object is not iterable
+
+
+D:\AI\HUST-FinalProject\PythonWeb>python manage.py runserver 192.168.100.9:8000
+Watching for file changes with StatReloader
+Performing system checks...
+
+System check identified no issues (0 silenced).
+May 14, 2019 - 22:38:50
+Django version 2.2.1, using settings 'PythonWeb.settings'
+Starting development server at http://192.168.100.9:8000/
+Quit the server with CTRL-BREAK.
+[14/May/2019 22:38:58] "GET /admin/predict/post/ HTTP/1.1" 200 5094
+[14/May/2019 22:38:58] "GET /admin/jsi18n/ HTTP/1.1" 200 3223
+D:\AI\HUST-FinalProject\PythonWeb\predict\admin.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+System check identified no issues (0 silenced).
+May 14, 2019 - 22:39:56
+Django version 2.2.1, using settings 'PythonWeb.settings'
+Starting development server at http://192.168.100.9:8000/
+Quit the server with CTRL-BREAK.
+[14/May/2019 22:40:00] "GET /admin/predict/post/ HTTP/1.1" 200 5929
+[14/May/2019 22:40:00] "GET /admin/jsi18n/ HTTP/1.1" 200 3223
+[14/May/2019 22:40:03] "GET /admin/predict/post/?date__gte=2019-05-14+00%3A00%3A00%2B00%3A00&date__lt=2019-05-15+00%3A00%3A00%2B00%3A00 HTTP/1.1" 200 6670
+[14/May/2019 22:40:03] "GET /admin/jsi18n/ HTTP/1.1" 200 3223
+[14/May/2019 22:40:04] "GET /admin/predict/post/?date__gte=2019-05-07+00%3A00%3A00%2B00%3A00&date__lt=2019-05-15+00%3A00%3A00%2B00%3A00 HTTP/1.1" 200 6670
+[14/May/2019 22:40:04] "GET /admin/jsi18n/ HTTP/1.1" 200 3223
+[14/May/2019 22:40:05] "GET /admin/predict/post/?date__gte=2019-05-01+00%3A00%3A00%2B00%3A00&date__lt=2019-06-01+00%3A00%3A00%2B00%3A00 HTTP/1.1" 200 6670
+[14/May/2019 22:40:05] "GET /admin/jsi18n/ HTTP/1.1" 200 3223
+[14/May/2019 22:40:09] "GET /contact/ HTTP/1.1" 200 1253
+[14/May/2019 22:40:09] "GET /static/images/image.jpg HTTP/1.1" 304 0
+[14/May/2019 22:40:19] "GET /admin HTTP/1.1" 301 0
+[14/May/2019 22:40:19] "GET /admin/ HTTP/1.1" 302 0
+[14/May/2019 22:40:19] "GET /admin/login/?next=/admin/ HTTP/1.1" 200 1819
+[14/May/2019 22:40:20] "GET /static/admin/css/base.css HTTP/1.1" 200 16378
+[14/May/2019 22:40:20] "GET /static/admin/css/login.css HTTP/1.1" 200 1233
+[14/May/2019 22:40:20] "GET /static/admin/css/responsive.css HTTP/1.1" 200 17944
+[14/May/2019 22:40:20] "GET /static/admin/css/fonts.css HTTP/1.1" 304 0
+[14/May/2019 22:40:20] "GET /static/admin/fonts/Roboto-Regular-webfont.woff HTTP/1.1" 304 0
+[14/May/2019 22:40:20] "GET /static/admin/fonts/Roboto-Light-webfont.woff HTTP/1.1" 304 0
+[14/May/2019 22:40:33] "POST /admin/login/?next=/admin/ HTTP/1.1" 302 0
+[14/May/2019 22:40:33] "GET /admin/ HTTP/1.1" 200 3722
+[14/May/2019 22:40:33] "GET /static/admin/css/dashboard.css HTTP/1.1" 200 412
+[14/May/2019 22:40:33] "GET /static/admin/img/icon-addlink.svg HTTP/1.1" 200 331
+[14/May/2019 22:40:33] "GET /static/admin/img/icon-changelink.svg HTTP/1.1" 200 380
+[14/May/2019 22:40:33] "GET /static/admin/fonts/Roboto-Bold-webfont.woff HTTP/1.1" 304 0
+[14/May/2019 22:40:37] "GET /admin/ HTTP/1.1" 200 3722
+[14/May/2019 22:40:42] "GET /admin/predict/post/ HTTP/1.1" 200 5929
+[14/May/2019 22:40:42] "GET /static/admin/css/changelists.css HTTP/1.1" 200 6170
+[14/May/2019 22:40:42] "GET /admin/jsi18n/ HTTP/1.1" 200 3223
+[14/May/2019 22:40:42] "GET /static/admin/js/jquery.init.js HTTP/1.1" 200 363
+[14/May/2019 22:40:42] "GET /static/admin/js/core.js HTTP/1.1" 200 7135
+[14/May/2019 22:40:42] "GET /static/admin/js/actions.js HTTP/1.1" 200 6538
+[14/May/2019 22:40:42] "GET /static/admin/js/urlify.js HTTP/1.1" 200 8972
+[14/May/2019 22:40:42] "GET /static/admin/js/admin/RelatedObjectLookups.js HTTP/1.1" 200 6918
+[14/May/2019 22:40:42] "GET /static/admin/js/prepopulate.js HTTP/1.1" 200 1530
+[14/May/2019 22:40:42] "GET /static/admin/js/vendor/jquery/jquery.js HTTP/1.1" 200 271751
+[14/May/2019 22:40:42] "GET /static/admin/js/vendor/xregexp/xregexp.js HTTP/1.1" 200 128820
+[14/May/2019 22:40:42] "GET /static/admin/img/tooltag-add.svg HTTP/1.1" 200 331
+[14/May/2019 22:40:50] "GET /admin/predict/post/ HTTP/1.1" 200 5929
+[14/May/2019 22:40:50] "GET /admin/jsi18n/ HTTP/1.1" 200 3223
+[14/May/2019 22:40:55] "GET / HTTP/1.1" 200 1255
+Not Found: /blog
+[14/May/2019 22:40:57] "GET /blog HTTP/1.1" 404 2260
+[14/May/2019 22:41:01] "GET /contact/ HTTP/1.1" 200 1253
+[14/May/2019 22:41:02] "GET / HTTP/1.1" 200 1255
+[14/May/2019 22:41:04] "GET /contact/ HTTP/1.1" 200 1253
+[14/May/2019 22:41:10] "GET /contact/ HTTP/1.1" 200 1253
+[14/May/2019 22:41:12] "GET / HTTP/1.1" 200 1255
+[14/May/2019 22:41:13] "GET /contact/ HTTP/1.1" 200 1253
+[14/May/2019 22:41:14] "GET / HTTP/1.1" 200 1255
+[14/May/2019 22:41:15] "GET /contact/ HTTP/1.1" 200 1253
+[14/May/2019 22:41:16] "GET / HTTP/1.1" 200 1255
+[14/May/2019 22:44:03] "GET / HTTP/1.1" 200 1240
+[14/May/2019 22:44:09] "GET / HTTP/1.1" 200 1240
+[14/May/2019 22:45:30] "GET / HTTP/1.1" 200 1234
+[14/May/2019 22:45:38] "GET / HTTP/1.1" 200 1234
+[14/May/2019 22:45:43] "GET / HTTP/1.1" 200 1234
+[14/May/2019 22:47:29] "GET / HTTP/1.1" 200 1246
+[14/May/2019 22:47:29] "GET /static/images/image.jpg HTTP/1.1" 304 0
+[14/May/2019 22:47:34] "GET / HTTP/1.1" 200 1246
+[14/May/2019 22:47:38] "GET / HTTP/1.1" 200 1246
+[14/May/2019 22:47:42] "GET / HTTP/1.1" 200 1246
+[14/May/2019 22:47:45] "GET / HTTP/1.1" 200 1246
+[14/May/2019 22:49:18] "GET /static/images/image.jpg HTTP/1.1" 200 64246
+[14/May/2019 22:49:55] "GET / HTTP/1.1" 200 1246
+[14/May/2019 22:49:56] "GET / HTTP/1.1" 200 1246
+[14/May/2019 22:50:36] "GET / HTTP/1.1" 200 1257
+[14/May/2019 22:50:41] "GET / HTTP/1.1" 200 1257
+[14/May/2019 22:50:45] "GET / HTTP/1.1" 200 1257
+[14/May/2019 22:50:55] "GET / HTTP/1.1" 200 1257
+[14/May/2019 22:50:57] "GET /contact/ HTTP/1.1" 200 1210
+[14/May/2019 22:50:58] "GET / HTTP/1.1" 200 1257
+[14/May/2019 22:51:30] "GET / HTTP/1.1" 200 1248
+[14/May/2019 22:51:42] "GET / HTTP/1.1" 200 1248
+[14/May/2019 22:51:52] "GET / HTTP/1.1" 200 1248
+[14/May/2019 22:51:53] "GET / HTTP/1.1" 200 1248
+[14/May/2019 22:51:55] "GET / HTTP/1.1" 200 1248
+[14/May/2019 22:51:59] "GET / HTTP/1.1" 200 1248
+[14/May/2019 22:52:48] "GET / HTTP/1.1" 200 1248
+[14/May/2019 22:53:01] "GET / HTTP/1.1" 200 1248
+[14/May/2019 22:53:05] "GET / HTTP/1.1" 200 1248
+[14/May/2019 22:53:17] "GET / HTTP/1.1" 200 1248
+[14/May/2019 22:53:20] "GET / HTTP/1.1" 200 1248
+[14/May/2019 22:53:23] "GET / HTTP/1.1" 200 1248
+[14/May/2019 22:53:24] "GET /contact/ HTTP/1.1" 200 1201
+[14/May/2019 22:53:25] "GET / HTTP/1.1" 200 1248
+[14/May/2019 22:53:26] "GET /contact/ HTTP/1.1" 200 1201
+[14/May/2019 22:53:27] "GET / HTTP/1.1" 200 1248
+[14/May/2019 22:53:28] "GET /contact/ HTTP/1.1" 200 1201
+[14/May/2019 22:53:28] "GET / HTTP/1.1" 200 1248
+[14/May/2019 22:53:29] "GET /contact/ HTTP/1.1" 200 1201
+[14/May/2019 22:53:32] "GET / HTTP/1.1" 200 1248
+[14/May/2019 22:53:33] "GET /contact/ HTTP/1.1" 200 1201
+[14/May/2019 22:53:33] "GET / HTTP/1.1" 200 1248
+[14/May/2019 22:56:33] "GET / HTTP/1.1" 200 1248
+[14/May/2019 22:56:33] "GET /static/images/image.jpg HTTP/1.1" 304 0
+[14/May/2019 22:57:24] "GET / HTTP/1.1" 200 1248
+[14/May/2019 22:57:25] "GET / HTTP/1.1" 200 1248
+[14/May/2019 22:57:25] "GET / HTTP/1.1" 200 1248
+[14/May/2019 22:57:26] "GET / HTTP/1.1" 200 1248
+[14/May/2019 22:57:26] "GET / HTTP/1.1" 200 1248
+[14/May/2019 22:57:26] "GET / HTTP/1.1" 200 1248
+[14/May/2019 22:57:26] "GET / HTTP/1.1" 200 1248
+[14/May/2019 22:57:26] "GET / HTTP/1.1" 200 1248
+[14/May/2019 22:57:26] "GET / HTTP/1.1" 200 1248
+[14/May/2019 22:57:27] "GET / HTTP/1.1" 200 1248
+[14/May/2019 22:58:33] "GET / HTTP/1.1" 200 1248
+[14/May/2019 22:58:33] "GET /static/images/image.jpg HTTP/1.1" 304 0
+[14/May/2019 22:58:34] "GET / HTTP/1.1" 200 1248
+[14/May/2019 22:58:36] "GET / HTTP/1.1" 200 1248
+D:\AI\HUST-FinalProject\PythonWeb\PythonWeb\urls.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+Exception in thread django-main-thread:
+Traceback (most recent call last):
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\threading.py", line 917, in _bootstrap_inner
+    self.run()
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\threading.py", line 865, in run
+    self._target(*self._args, **self._kwargs)
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\utils\autoreload.py", line 54, in wrapper
+    fn(*args, **kwargs)
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\core\management\commands\runserver.py", line 117, in inner_run
+    self.check(display_num_errors=True)
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\core\management\base.py", line 390, in check
+    include_deployment_checks=include_deployment_checks,
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\core\management\base.py", line 377, in _run_checks
+    return checks.run_checks(**kwargs)
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\core\checks\registry.py", line 72, in run_checks
+    new_errors = check(app_configs=app_configs)
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\core\checks\urls.py", line 40, in check_url_namespaces_unique
+    all_namespaces = _load_all_namespaces(resolver)
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\core\checks\urls.py", line 57, in _load_all_namespaces
+    url_patterns = getattr(resolver, 'url_patterns', [])
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\utils\functional.py", line 80, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\urls\resolvers.py", line 579, in url_patterns
+    patterns = getattr(self.urlconf_module, "urlpatterns", self.urlconf_module)
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\utils\functional.py", line 80, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\urls\resolvers.py", line 572, in urlconf_module
+    return import_module(self.urlconf_name)
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\importlib\__init__.py", line 127, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1006, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 983, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 967, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 677, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 728, in exec_module
+  File "<frozen importlib._bootstrap>", line 219, in _call_with_frames_removed
+  File "D:\AI\HUST-FinalProject\PythonWeb\PythonWeb\urls.py", line 22, in <module>
+    path('predict/', include('predict.urls'))
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\urls\conf.py", line 34, in include
+    urlconf_module = import_module(urlconf_module)
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\importlib\__init__.py", line 127, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1006, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 983, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 965, in _find_and_load_unlocked
+ModuleNotFoundError: No module named 'predict.urls'
+
+Traceback (most recent call last):
+  File "manage.py", line 21, in <module>
+    main()
+  File "manage.py", line 17, in main
+    execute_from_command_line(sys.argv)
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\core\management\__init__.py", line 381, in execute_from_command_line
+    utility.execute()
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\core\management\__init__.py", line 375, in execute
+    self.fetch_command(subcommand).run_from_argv(self.argv)
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\core\management\base.py", line 323, in run_from_argv
+    self.execute(*args, **cmd_options)
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\core\management\commands\runserver.py", line 60, in execute
+    super().execute(*args, **options)
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\core\management\base.py", line 364, in execute
+    output = self.handle(*args, **options)
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\core\management\commands\runserver.py", line 95, in handle
+    self.run(**options)
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\core\management\commands\runserver.py", line 102, in run
+    autoreload.run_with_reloader(self.inner_run, **options)
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\utils\autoreload.py", line 577, in run_with_reloader
+    start_django(reloader, main_func, *args, **kwargs)
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\utils\autoreload.py", line 562, in start_django
+    reloader.run(django_main_thread)
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\utils\autoreload.py", line 280, in run
+    self.run_loop()
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\utils\autoreload.py", line 286, in run_loop
+    next(ticker)
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\utils\autoreload.py", line 326, in tick
+    for filepath, mtime in self.snapshot_files():
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\utils\autoreload.py", line 342, in snapshot_files
+    for file in self.watched_files():
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\utils\autoreload.py", line 241, in watched_files
+    yield from iter_all_python_module_files()
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\utils\autoreload.py", line 103, in iter_all_python_module_files
+    return iter_modules_and_files(modules, frozenset(_error_files))
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\utils\autoreload.py", line 128, in iter_modules_and_files
+    if not path.exists():
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\pathlib.py", line 1329, in exists
+    self.stat()
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\pathlib.py", line 1151, in stat
+    return self._accessor.stat(self)
+OSError: [WinError 123] The filename, directory name, or volume label syntax is incorrect: '<frozen importlib._bootstrap>'
+
+D:\AI\HUST-FinalProject\PythonWeb>python manage.py runserver 192.168.100.9:8000
+Watching for file changes with StatReloader
+Performing system checks...
+
+System check identified no issues (0 silenced).
+May 14, 2019 - 23:16:05
+Django version 2.2.1, using settings 'PythonWeb.settings'
+Starting development server at http://192.168.100.9:8000/
+Quit the server with CTRL-BREAK.
+[14/May/2019 23:17:21] "GET / HTTP/1.1" 200 1294
+[14/May/2019 23:17:21] "GET /static/images/image.jpg HTTP/1.1" 304 0
+[14/May/2019 23:17:24] "GET /predict HTTP/1.1" 301 0
+Internal Server Error: /predict/
+Traceback (most recent call last):
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\core\handlers\exception.py", line 34, in inner
+    response = get_response(request)
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\core\handlers\base.py", line 115, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\core\handlers\base.py", line 113, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "D:\AI\HUST-FinalProject\PythonWeb\predict\views.py", line 6, in list
+    data =  {"posts",Post.object.all().order_by("-date")}
+AttributeError: type object 'Post' has no attribute 'object'
+[14/May/2019 23:17:24] "GET /predict/ HTTP/1.1" 500 66415
+D:\AI\HUST-FinalProject\PythonWeb\PythonWeb\urls.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+System check identified no issues (0 silenced).
+May 14, 2019 - 23:19:32
+Django version 2.2.1, using settings 'PythonWeb.settings'
+Starting development server at http://192.168.100.9:8000/
+Quit the server with CTRL-BREAK.
+[14/May/2019 23:19:38] "GET / HTTP/1.1" 200 1294
+[14/May/2019 23:19:38] "GET /static/images/image.jpg HTTP/1.1" 304 0
+[14/May/2019 23:19:39] "GET /predict HTTP/1.1" 301 0
+Internal Server Error: /predict/
+Traceback (most recent call last):
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\core\handlers\exception.py", line 34, in inner
+    response = get_response(request)
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\core\handlers\base.py", line 115, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\core\handlers\base.py", line 113, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "D:\AI\HUST-FinalProject\PythonWeb\predict\views.py", line 6, in list
+    data =  {"posts",Post.object.all().order_by("-date")}
+AttributeError: type object 'Post' has no attribute 'object'
+[14/May/2019 23:19:39] "GET /predict/ HTTP/1.1" 500 66548
+D:\AI\HUST-FinalProject\PythonWeb\predict\views.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+System check identified no issues (0 silenced).
+May 14, 2019 - 23:21:04
+Django version 2.2.1, using settings 'PythonWeb.settings'
+Starting development server at http://192.168.100.9:8000/
+Quit the server with CTRL-BREAK.
+Internal Server Error: /predict/
+Traceback (most recent call last):
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\core\handlers\exception.py", line 34, in inner
+    response = get_response(request)
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\core\handlers\base.py", line 115, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\core\handlers\base.py", line 113, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "D:\AI\HUST-FinalProject\PythonWeb\predict\views.py", line 6, in list
+    data =  {"posts":Post.object.all().order_by("-date")}
+AttributeError: type object 'Post' has no attribute 'object'
+[14/May/2019 23:21:08] "GET /predict/ HTTP/1.1" 500 66683
+Internal Server Error: /predict/
+Traceback (most recent call last):
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\core\handlers\exception.py", line 34, in inner
+    response = get_response(request)
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\core\handlers\base.py", line 115, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python37\lib\site-packages\django\core\handlers\base.py", line 113, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "D:\AI\HUST-FinalProject\PythonWeb\predict\views.py", line 6, in list
+    data =  {"posts":Post.object.all().order_by("-date")}
+AttributeError: type object 'Post' has no attribute 'object'
+[14/May/2019 23:21:38] "GET /predict/ HTTP/1.1" 500 66548
+D:\AI\HUST-FinalProject\PythonWeb\predict\views.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+System check identified no issues (0 silenced).
+May 14, 2019 - 23:21:54
+Django version 2.2.1, using settings 'PythonWeb.settings'
+Starting development server at http://192.168.100.9:8000/
+Quit the server with CTRL-BREAK.
+D:\AI\HUST-FinalProject\PythonWeb\predict\views.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+System check identified no issues (0 silenced).
+May 14, 2019 - 23:21:56
+Django version 2.2.1, using settings 'PythonWeb.settings'
+Starting development server at http://192.168.100.9:8000/
+Quit the server with CTRL-BREAK.
+[14/May/2019 23:21:58] "GET /predict/ HTTP/1.1" 200 1270
+[14/May/2019 23:22:05] "GET / HTTP/1.1" 200 1294
+[14/May/2019 23:22:07] "GET /predict/ HTTP/1.1" 200 1270
+[14/May/2019 23:22:09] "GET /predict/ HTTP/1.1" 200 1270
+[14/May/2019 23:22:10] "GET / HTTP/1.1" 200 1294
+[14/May/2019 23:22:11] "GET /predict/ HTTP/1.1" 200 1270
+[14/May/2019 23:22:14] "GET / HTTP/1.1" 200 1294
+[14/May/2019 23:22:14] "GET /predict/ HTTP/1.1" 200 1270
+[14/May/2019 23:22:15] "GET / HTTP/1.1" 200 1294
+[14/May/2019 23:22:16] "GET /predict/ HTTP/1.1" 200 1270
+[14/May/2019 23:22:16] "GET / HTTP/1.1" 200 1294
+[14/May/2019 23:22:17] "GET /predict/ HTTP/1.1" 200 1270
+[14/May/2019 23:22:18] "GET / HTTP/1.1" 200 1294
+[14/May/2019 23:22:18] "GET /predict/ HTTP/1.1" 200 1270
+[14/May/2019 23:22:19] "GET / HTTP/1.1" 200 1294
+[14/May/2019 23:22:19] "GET /predict/ HTTP/1.1" 200 1270
