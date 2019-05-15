@@ -1,9 +1,24 @@
 {%extends "pages/base.html"%}
 
+{% load staticfiles %}
+
 {%block title%} Home {%endblock%}
 
 
 {%block content %}
-<h3>There Are Many Great Place Here</h3>
-hello guys, this is the home pages of website.
+
+<div class="row">
+    {% for image in images %}
+            <div class="col-md-3">
+              <div class="thumbnail">
+                <a href="static/{{image}}">
+                  <img src="static/{{image}}" alt="Lights" style="width:100%">
+                  <div class="caption">
+                    <center>Caption</center>
+                  </div>
+                </a>
+              </div>
+            </div>
+    {% endfor %}
+</div>
 {%endblock%}
