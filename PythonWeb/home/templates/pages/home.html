@@ -8,13 +8,13 @@
 {%block content %}
 
 <div class="row">
-    {% for image in images %}
+    {% for lanmark in lanmarks %}
             <div class="col-md-3">
               <div class="thumbnail">
-                <a href="static/{{image}}">
-                  <img src="static/{{image}}" alt="Lights" style="width:100%">
+                <a href="static/{{lanmark.image}}">
+                  <img src="static/{{lanmark.image}}" alt="Lights" style="width:100%">
                   <div class="caption">
-                    <center>Caption</center>
+                    <center>{{lanmark.title}}</center>
                   </div>
                 </a>
               </div>
