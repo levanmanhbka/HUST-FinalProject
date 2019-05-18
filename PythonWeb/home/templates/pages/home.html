@@ -11,8 +11,8 @@
     {% for lanmark in lanmarks %}
             <div class="col-md-3">
               <div class="thumbnail">
-                <a href="static/{{lanmark.image}}">
-                  <img src="static/{{lanmark.image}}" alt="Lights" style="width:100%">
+                <a href="{{lanmark.image.url}}">
+                  <img src="{{lanmark.image.url}}" alt="Lights" style="width:100%">
                   <div class="caption">
                     <center>{{lanmark.title}}</center>
                   </div>
