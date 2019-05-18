@@ -1,0 +1,10 @@
+{%extends "pages/base.html"%}
+
+{% load staticfiles %}
+
+{%block title%} {{lanmark.title}}} {%endblock%}
+
+{%block content %}
+    <h1>{{lanmark.title}}</h1>
+    <p>{{lanmark.body}}</p>
+{%endblock%}

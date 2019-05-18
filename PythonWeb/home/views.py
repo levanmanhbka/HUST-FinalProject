@@ -5,3 +5,8 @@ from .models import Lanmark
 def index(request):
     lanmarks =  {"lanmarks":Lanmark.objects.all().order_by("num")}
     return render(request, "pages/home.html", lanmarks)
+
+def detail(request, id):
+    lanmark = Lanmark.objects.get(id=id)
+    print(id)
+    return render(request, "pages/detail.html", {'lanmark':lanmark})
