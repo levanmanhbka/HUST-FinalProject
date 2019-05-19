@@ -7,6 +7,22 @@
 
 {%block content %}
 
+<br>
+<br>
+<br>
+
+<div class="row">
+  <form action="upload" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="file" name="myfile">
+    <button type="submit">Upload</button>
+  </form>
+</div>
+
+<br>
+<br>
+<br>
+
 <div class="row">
     {% for lanmark in lanmarks %}
             <div class="col-md-3">
