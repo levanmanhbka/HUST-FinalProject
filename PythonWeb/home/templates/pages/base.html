@@ -9,14 +9,35 @@
 	<title>{% block title %}{% endblock %}</title>
 	<style type="text/css">
 		html,
-		body {
+		body 
+		{
 			height: 100%;
 		}
+
+		.my_image 
+		{
+			display: block;
+			margin-left: auto;
+			margin-right: auto;
+		}
+		.container:hover .image {
+			opacity: 0.3;
+		}
+
 	</style>
 </head>
 
+<script>
+	
+</script>
+
 <body>
-	<div class="container-fluid" style="min-height: 95%">
+	<header class="container-fluid" style="background: green">
+		<a href="/">
+			<img onclick = "gotoHomePage" src="{% static 'images/home.png'%}" alt="home.png" style="margin: 5px; width: 34px; height: 34;" >
+		</a>
+	</header>
+	<div class="container-fluid" style="min-height: 85%">
 		{% block content %}{% endblock %}
 	</div>
 

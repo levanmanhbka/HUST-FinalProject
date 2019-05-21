@@ -12,11 +12,19 @@
 <br>
 
 <div class="row">
-  <form action="upload" method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    <input type="file" name="myfile">
-    <button type="submit">Upload</button>
-  </form>
+    <div class="col-md-12">
+      <img class = "my_image" src="../../../media/hohoankiem.jpg" alt="hoankiem" style="width:50%">    
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12" style="margin-top: 30px">
+        <form class="form-inline" action="upload" method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          <input type="file" name="myfile" class="btn-dark" style="margin-left: auto; margin-right: auto">
+          <button type="submit" class="btn-success" style="margin-left: auto; margin-right: auto; margin-top:10px">Upload Your Image</button>
+        </form>
+    </div>
 </div>
 
 <br>

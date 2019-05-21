@@ -2,6 +2,7 @@ import tensorflow as tf
 import numpy as np
 import cv2 as cv
 import matplotlib.pyplot as plt
+from home.network_predic import predict_image_function
 
 class ReoderLanmark():
 
@@ -12,6 +13,10 @@ class ReoderLanmark():
 
     def get_new_order(self, anchor_name, num_lanmark=64):
         print("get_new_order: anchor= ", anchor_name)
+        
+        predict_result = predict_image_function(anchor_name)
+        print("predict_result: ", predict_result)
+
         image = cv.imread(anchor_name)
         image = self.standed_image(image=image)
         cv.imshow("image", image)
