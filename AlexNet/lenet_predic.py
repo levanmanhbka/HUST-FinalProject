@@ -8,7 +8,7 @@ import network_config as config
 
 np.set_printoptions(precision=4)
 
-model_save_name = "cnn_model"
+model_path_name= "lenet_model/"
 
 # image param
 with open(config.lable_file_name) as json_file:    
@@ -28,7 +28,7 @@ def crop_center(img, cropx, cropy):
     starty = y//2-(cropy//2)
     return img[starty:starty+cropy, startx:startx+cropx]
 
-image_name = 'D:/Temp/predict.jpg'
+image_name = 'D:/Temp/chuamotcot.jpg'
 img = cv.imread(image_name)
 crop_size = min(img.shape[0:2])
 crop_img = crop_center(img, crop_size, crop_size)
@@ -51,10 +51,10 @@ labels = np.zeros((1, dict_lables["num_type"]))
 session = tf.Session()
 
 # create a saver object to load the model
-saver = tf.train.import_meta_graph(os.path.join(model_save_name, '.meta'))
+saver = tf.train.import_meta_graph(os.path.join(model_path_name, 'model.ckpt.meta'))
 
 # restore the model from our checkpoints folder
-saver.restore(session, os.path.join(model_save_name, '.\\'))
+saver.restore(session, os.path.join(model_path_name, 'model.ckpt'))
 
 # create graph object for getting the same network architecture
 graph = tf.get_default_graph()

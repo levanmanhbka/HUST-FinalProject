@@ -3,6 +3,7 @@ import time
 from dataset_loader import DatasetLoader
 from cnn_layers import Layers
 import network_config as config
+import os
 
 # Layer
 layers = Layers()
@@ -25,7 +26,7 @@ image_height = config.image_height
 image_channel = config.image_channel
 image_types = dataset.get_num_types()
 
-model_save_name= "alex_model/"
+model_path_name= "alex_model/"
 
 # Placeholder variable for the input images
 x_train = tf.placeholder(tf.float32, shape=[None, image_width, image_height, image_channel], name='x_train')
@@ -117,26 +118,49 @@ print(fc_layer_3)
 
 
 #--------------------------- Training model -------------------------#
-y_pred = tf.nn.softmax(fc_layer_3)
+# Use Softmax function to normalize the output
+with tf.variable_scope("softmax"):
+    y_pred = tf.nn.softmax(fc_layer_3)
 
-# Define loss and optimizer
-cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits = fc_layer_3, labels= y_true))
-optimizer = tf.train.AdamOptimizer(learning_rate=1e-4).minimize(cost)
+# Use Cross entropy cost function
+with tf.name_scope("cross_cost"):
+    cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits = fc_layer_3, labels= y_true), name="cross_cost")
+    tf.summary.scalar("cross_cost", cost)
 
-# Evaluate model
-correct_pred = tf.equal(tf.argmax(y_pred, 1), tf.argmax(y_true, 1))
-accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
+# Use Adam Optimizer
+with tf.name_scope("optimizer"):
+    optimizer = tf.train.AdamOptimizer(learning_rate=1e-4).minimize(cost)
 
-# Datasets
-dataset  = DatasetLoader()
+# Accuracy
+with tf.name_scope("accuracy"):
+    correct_pred = tf.equal(tf.argmax(y_pred, 1), tf.argmax(y_true, 1))
+    accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
+    tf.summary.scalar("accuracy", accuracy)
+
+# Merge all summaries together
+merged_summary = tf.summary.merge_all()
+
+# Initialize the FileWriter
+writer_train = tf.summary.FileWriter(model_path_name + "train")
+writer_valid = tf.summary.FileWriter(model_path_name + "valid")
+train_num_loop = 0
+valid_num_loop = 0
+print('Run `tensorboard --logdir=%s` to see the results.' % model_path_name)
 
 with tf.Session() as sess:
-     # Saver
+    # Saver
     saver = tf.train.Saver(max_to_keep=4)
     # Initialize the variables
     sess.run(tf.global_variables_initializer())
+    # # create a saver object to load the model
+    # saver = tf.train.import_meta_graph(os.path.join(model_path_name, 'model.ckpt.meta'))
+    # # restore the model from our checkpoints folder
+    # saver.restore(sess, os.path.join(model_path_name, 'model.ckpt'))
+    # Add the model graph to TensorBoard
+    writer_train.add_graph(sess.graph)
     # Loop over number of eporchs
     for epoch in range(NUM_EPOCHS):
+        print("training epoch ", epoch)
         dataset.load_datasets_random(3000)
         start_time = time.time()
         train_accuracy = 0.0
@@ -149,14 +173,29 @@ with tf.Session() as sess:
             sess.run(optimizer, feed_dict=feed_dict_train)
             # Calculate the accuracy on the batch of training data
             train_accuracy += sess.run(accuracy, feed_dict=feed_dict_train)
+            # Generate summary with the current batch of data and write to file
+            summ = sess.run(merged_summary, feed_dict=feed_dict_train)
+            writer_train.add_summary(summ, train_num_loop)
+            train_num_loop += 1
         
-        saver.save(sess, model_save_name)
+        saver.save(sess, os.path.join(model_path_name, "model.ckpt"))
         
         train_accuracy = train_accuracy / (dataset.get_num_train()/BATCH_SIZE)
         # Validate the model on the entire validation set
-        vali_accuracy = sess.run(accuracy, feed_dict={x_train:dataset.x_test, y_true:dataset.y_test})
+        print("validating epoch ", epoch)
+        vali_accuracy = 0
+        num_test_patch = 0
+        dataset.reset_data_test_index()
+        while dataset.load_data_test_continuos():
+            summ, vali_accuracy_temp = sess.run([merged_summary, accuracy], feed_dict={x_train:dataset.x_test, y_true:dataset.y_test})
+            writer_valid.add_summary(summ, valid_num_loop)
+            vali_accuracy += vali_accuracy_temp
+            num_test_patch += 1.0
+            valid_num_loop += 1
+        vali_accuracy /= num_test_patch
+
         end_time = time.time()
         print("Epoch "+str(epoch+1)+" completed : Time usage "+str(int(end_time-start_time))+" seconds")
-        print("\tAccuracy:")
-        print ("\t- Training Accuracy:\t{}".format(train_accuracy))
-        print ("\t- Validation Accuracy:\t{}".format(vali_accuracy))
+        print("\t- Training Accuracy:\t{}".format(train_accuracy))
+        print("\t- Validation Accuracy:\t{}".format(vali_accuracy))
+        print("")

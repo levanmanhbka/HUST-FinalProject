@@ -34,25 +34,24 @@ y_true = tf.placeholder(tf.float32, shape=[None, image_types], name='y_true')
 layer_conv1, weights_conv1 = layers.new_conv_layer(input_tensor=x_train, input_channel= image_channel, 
 filter_size=5, filter_num=8, filter_stride=[1, 1, 1, 1], filter_padding="SAME",name ="conv1")
 print(layer_conv1)
-# RelU layer 1
-layer_conv1 = layers.new_relu_layer(layer_conv1, name="relu1")
-print(layer_conv1)
 # Pooling Layer 1
 layer_conv1 = layers.new_pool_layer(input_tensor=layer_conv1, 
 ker_size=[1, 2, 2, 1], ker_stride=[1, 2, 2, 1], ker_padding="SAME",name="pool1")
 print(layer_conv1)
-
+# RelU layer 1
+layer_conv1 = layers.new_relu_layer(layer_conv1, name="relu1")
+print(layer_conv1)
 
 # Convolutional Layer 2
 layer_conv2, weights_conv2 = layers.new_conv_layer(input_tensor=layer_conv1, input_channel= 8, 
 filter_size=5, filter_num=16, filter_stride=[1, 1, 1, 1], filter_padding="SAME",name ="conv2")
 print(layer_conv2)
-# RelU layer 2
-layer_conv2 = layers.new_relu_layer(layer_conv2, name="relu2")
-print(layer_conv2)
 # Pooling Layer 2
 layer_conv2 = layers.new_pool_layer(input_tensor=layer_conv2, 
 ker_size=[1, 2, 2, 1], ker_stride=[1, 2, 2, 1], ker_padding="SAME",name="pool2")
+print(layer_conv2)
+# RelU layer 2
+layer_conv2 = layers.new_relu_layer(layer_conv2, name="relu2")
 print(layer_conv2)
 
 
@@ -60,14 +59,13 @@ print(layer_conv2)
 layer_conv3, weights_conv3 = layers.new_conv_layer(input_tensor=layer_conv2, input_channel= 16, 
 filter_size=5, filter_num=32, filter_stride=[1, 1, 1, 1], filter_padding="SAME",name ="conv3")
 print(layer_conv3)
-# RelU layer 3
-layer_conv3 = layers.new_relu_layer(layer_conv3, name="relu3")
-print(layer_conv3)
 # Pooling Layer 3
 layer_conv3 = layers.new_pool_layer(input_tensor=layer_conv3, 
 ker_size=[1, 2, 2, 1], ker_stride=[1, 2, 2, 1], ker_padding="SAME",name="pool3")
 print(layer_conv3)
-
+# RelU layer 3
+layer_conv3 = layers.new_relu_layer(layer_conv3, name="relu3")
+print(layer_conv3)
 
 # Flatten Layer
 num_features = layer_conv3.get_shape()[1:4].num_elements()
@@ -113,6 +111,7 @@ writer_train = tf.summary.FileWriter(model_path_name + "train")
 writer_valid = tf.summary.FileWriter(model_path_name + "valid")
 train_num_loop = 0
 valid_num_loop = 0
+print('Run `tensorboard --logdir=%s` to see the results.' % model_path_name)
 
 # TensorFlow Session
 with tf.Session() as sess:
@@ -121,13 +120,14 @@ with tf.Session() as sess:
     # Initialize all variables
     sess.run(tf.global_variables_initializer())
     # # create a saver object to load the model
-    # saver = tf.train.import_meta_graph(os.path.join(model_path_name, '.meta'))
+    # saver = tf.train.import_meta_graph(os.path.join(model_path_name, 'model.ckpt.meta'))
     # # restore the model from our checkpoints folder
-    # saver.restore(sess, os.path.join(model_path_name, '.\\'))
+    # saver.restore(sess, os.path.join(model_path_name, 'model.ckpt'))
     # Add the model graph to TensorBoard
     writer_train.add_graph(sess.graph)
     # Loop over number of epochs
     for epoch in range(NUM_EPOCHS):
+        print("training epoch ", epoch)
         start_time = time.time()
         train_accuracy = 0
         for batch in range(0, int(dataset.get_num_train()/BATCH_SZE)):
@@ -149,6 +149,7 @@ with tf.Session() as sess:
 
         train_accuracy /= int(dataset.get_num_train()/BATCH_SZE)
         # Generate summary and validate the model on the entire validation set
+        print("validating epoch ", epoch)
         vali_accuracy = 0
         num_test_patch = 0
         dataset.reset_data_test_index()
@@ -163,7 +164,6 @@ with tf.Session() as sess:
         end_time = time.time()
         
         print("Epoch "+str(epoch+1)+" completed : Time usage "+str(int(end_time-start_time))+" seconds")
-        print("\tAccuracy:")
-        print ("\t- Training Accuracy:\t{}".format(train_accuracy))
-        print ("\t- Validation Accuracy:\t{}".format(vali_accuracy))
-        print('Run `tensorboard --logdir=%s` to see the results.' % model_path_name)
+        print("\t- Training Accuracy:\t{}".format(train_accuracy))
+        print("\t- Validation Accuracy:\t{}".format(vali_accuracy))
+        print("")
