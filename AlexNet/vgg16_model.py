@@ -4,6 +4,7 @@ import time
 from dataset_loader import DatasetLoader
 import network_config as config
 from cnn_layers import Layers
+import os
 
 # Datasets
 dataset  = DatasetLoader()
@@ -12,11 +13,12 @@ dataset  = DatasetLoader()
 layers = Layers()
 
 # Save model
-model_save_name= "vgg16_model/"
+model_path_name= "vgg16_model"
+#model_path_name= config.root_path + "/code_project/vgg16_model" #for google colab
 
 # Config trainning
 NUM_EPOCHS = 50
-BATCH_SIZE = 100
+BATCH_SIZE = 64
 
 # Model parameters
 image_width = config.image_width
@@ -159,16 +161,15 @@ with tf.name_scope("accuracy"):
     correct_prediction = tf.equal(tf.argmax(y_pred, axis=1), tf.argmax(y_true, axis=1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
-# Initialize the FileWriter
-writer_train = tf.summary.FileWriter("vgg16_training_file_writer/")
-writer_valid = tf.summary.FileWriter("vgg16_validation_file_writer/")
-
-# Add the cost and accuracy to summary
-tf.summary.scalar('loss', cost)
-tf.summary.scalar('accuracy', accuracy)
-
 # Merge all summaries together
 merged_summary = tf.summary.merge_all()
+
+# Initialize the FileWriter
+writer_train = tf.summary.FileWriter(model_path_name + "/train")
+writer_valid = tf.summary.FileWriter(model_path_name + "/valid")
+train_num_loop = 0
+valid_num_loop = 0
+print('Run `tensorboard --logdir=%s` to see the results.' % model_path_name)
 
 # TensorFlow Session
 with tf.Session() as sess:
@@ -176,16 +177,22 @@ with tf.Session() as sess:
     saver = tf.train.Saver(max_to_keep=4)
     # Initialize all variables
     sess.run(tf.global_variables_initializer())
+    # # create a saver object to load the model
+    # saver = tf.train.import_meta_graph(os.path.join(model_path_name, 'model.ckpt.meta'))
+    # # restore the model from our checkpoints folder
+    # saver.restore(sess, os.path.join(model_path_name, 'model.ckpt'))
     # Add the model graph to TensorBoard
     writer_train.add_graph(sess.graph)
     # Loop over number of epochs
     for epoch in range(NUM_EPOCHS):
-        dataset.load_datasets_random(3000)
         start_time = time.time()
         train_accuracy = 0
-        for batch in range(0, int(dataset.get_num_train()/BATCH_SIZE)):
+        num_batch = int(dataset.get_num_train()/BATCH_SIZE + 1)
+        print("training epoch ", epoch, "num batch ", num_batch, " size batch ", BATCH_SIZE)
+        for batch in range(0, num_batch):
             # Get a batch of images and labels
-            x_batch, y_batch = dataset.load_batch_dataset(BATCH_SIZE)
+            dataset.load_data_train_next(BATCH_SIZE)
+            x_batch, y_batch = dataset.x_train, dataset.y_train
             # Put the batch into a dict with the proper names for placeholder variables
             feed_dict_train = {x_train: x_batch, y_true: y_batch}
             # Run the optimizer using this batch of training data.
@@ -194,16 +201,27 @@ with tf.Session() as sess:
             train_accuracy += sess.run(accuracy, feed_dict=feed_dict_train)
             # Generate summary with the current batch of data and write to file
             summ = sess.run(merged_summary, feed_dict=feed_dict_train)
-            writer_train.add_summary(summ, epoch*int(dataset.get_num_train()/BATCH_SIZE) + batch)
+            writer_train.add_summary(summ, train_num_loop)
+            train_num_loop += 1
         
-        saver.save(sess, model_save_name)
-        
-        train_accuracy /= int(dataset.get_num_train()/BATCH_SIZE)
+        saver.save(sess, os.path.join(model_path_name, "model.ckpt"))
+        print("model saved:", os.path.join(model_path_name, "model.ckpt"))
+        train_accuracy /= num_batch
+
         # Generate summary and validate the model on the entire validation set
-        summ, vali_accuracy = sess.run([merged_summary, accuracy], feed_dict={x_train:dataset.x_test, y_true:dataset.y_test})
-        writer_valid.add_summary(summ, epoch)
-        end_time = time.time()
+        print("validating epoch ", epoch)
+        vali_accuracy = 0
+        num_test_patch = 0.001
+        while dataset.load_data_test_next(BATCH_SIZE):
+            summ, vali_accuracy_temp = sess.run([merged_summary, accuracy], feed_dict={x_train:dataset.x_test, y_true:dataset.y_test})
+            writer_valid.add_summary(summ, valid_num_loop)
+            vali_accuracy += vali_accuracy_temp
+            num_test_patch += 1.0
+            valid_num_loop += 1
+        vali_accuracy /= num_test_patch
         
+        end_time = time.time()
+
         print("Epoch "+str(epoch+1)+" completed : Time usage "+str(int(end_time-start_time))+" seconds")
         print("\tAccuracy:")
         print ("\t- Training Accuracy:\t{}".format(train_accuracy))

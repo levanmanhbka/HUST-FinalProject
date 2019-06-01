@@ -8,7 +8,7 @@ import network_config as config
 
 np.set_printoptions(precision=4)
 
-model_path_name= "lenet_model/"
+model_path_name= "lenet_model"
 
 # image param
 with open(config.lable_file_name) as json_file:    
@@ -34,6 +34,8 @@ crop_size = min(img.shape[0:2])
 crop_img = crop_center(img, crop_size, crop_size)
 resize_img = cv.resize(crop_img, (image_width, image_height))
 
+resize_img = resize_img / 255.0
+
 # show image
 plt.figure(1)
 plt.imshow(img)
@@ -41,7 +43,6 @@ plt.figure(2)
 plt.imshow(crop_img)
 plt.figure(3)
 plt.imshow(resize_img)
-plt.show()
 
 predict_img = resize_img.reshape(1, image_width, image_height, image_channel)
 
@@ -77,4 +78,6 @@ result = session.run(network, feed_dict=feed_dict_testing)
 # show data
 print(result)
 print(dict_lables[str(np.argmax(result[0]))])
+
+plt.show()
 

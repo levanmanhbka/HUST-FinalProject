@@ -16,35 +16,43 @@ def create_dataset_folder():
 
  #3 separate folder part of samples to train, 1 part of samples to test
 def separate_folder(src_folder, id_class):
-    src_list_file = os.listdir(src_folder)
-    num_sample = len(src_list_file)
-    num_test = int(num_sample / 4)
-    list_test_select = random.sample(range(num_sample), num_test)
-    list_test_select.sort()
+    list_src_image = os.listdir(src_folder)
+    file_number = len(list_src_image)
+    test_number = int(file_number / 4)
+    train_number = file_number - test_number
 
+    list_src_image = random.sample(list_src_image, file_number)
+    list_train_image = list_src_image[test_number:file_number]
+    list_test_image = list_src_image[0:test_number]
+    
     file_number = 0
-    test_number = 0
     train_number = 0
-    test_select = 0
+    test_number = 0
 
-    for file_name in src_list_file:
+    for file_name in list_train_image:
         src_file = src_folder + "/" + file_name
-        dst_file = ""
-        if (file_number == list_test_select[test_select]):
-            dst_file = config.test_folder_path + "/" + str(id_class) + "_" + str(test_number) + ".jpg"
-            if test_select < num_test - 1:
-                test_select = test_select + 1
-            test_number = test_number + 1
-        else:
-            dst_file = config.train_folder_path + "/" + str(id_class) + "_" + str(train_number) + ".jpg"
-            train_number = train_number + 1
-
+        dst_file = config.train_folder_path + "/" + str(id_class) + "_" + str(train_number) + ".jpg"
         image = cv.imread(src_file)
         if image is None:
             os.remove(src_file)
         elif len(image.shape) == 3:
             image = cv.resize(image, (config.image_width, config.image_height))
             cv.imwrite(dst_file, image)
+            train_number = train_number + 1
+            file_number = file_number + 1
+        else:
+            os.remove(src_file)
+
+    for file_name in list_test_image:
+        src_file = src_folder + "/" + file_name
+        dst_file = config.test_folder_path + "/" + str(id_class) + "_" + str(test_number) + ".jpg"
+        image = cv.imread(src_file)
+        if image is None:
+            os.remove(src_file)
+        elif len(image.shape) == 3:
+            image = cv.resize(image, (config.image_width, config.image_height))
+            cv.imwrite(dst_file, image)
+            test_number = test_number + 1
             file_number = file_number + 1
         else:
             os.remove(src_file)

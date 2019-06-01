@@ -33,9 +33,12 @@ class DatasetLoader():
             print("DatasetLoader dict_lables ++++++++++++")
             print(self.dict_lables)
             print("DatasetLoader dict_lables ------------")
-        self.load_datasets_random(config.training_buffer)
+        self.x_train_index = 0
+        self.list_train_image_name = os.listdir(config.train_folder_path)
+        self.list_train_image_name = random.sample(self.list_train_image_name, len(self.list_train_image_name))
         self.x_test_index = 0
-        self.x_test_max = self.get_num_test()
+        self.list_test_image_name = os.listdir(config.test_folder_path)
+        self.list_test_image_name = random.sample(self.list_test_image_name, len(self.list_test_image_name))
 
     def __load_all_datasets(self):
         x_train = []
@@ -62,14 +65,18 @@ class DatasetLoader():
         self.x_test = np.array(x_test)
         self.y_train = np.array(y_train)
         self.y_test = np.array(y_test)
+        self.x_train = self.x_train / 255.0
+        self.x_test = self.x_test / 255.0
 
-    def load_datasets_random(self, num_image):
+    def load_data_train_next(self, batch_size):
         x_train = []
         y_train = []
-        if num_image > self.dict_lables["num_train"]:
-            num_image = self.dict_lables["num_train"]
-        list_samples = os.listdir(config.train_folder_path)
-        list_chosed = random.sample(list_samples, int(num_image))
+        if len(self.list_train_image_name) < batch_size:
+            batch_size = len(self.list_train_image_name)
+        if self.x_train_index + batch_size > len(self.list_train_image_name):
+            self.list_train_image_name = random.sample(self.list_train_image_name, len(self.list_train_image_name))
+            self.x_train_index = 0
+        list_chosed = self.list_train_image_name[self.x_train_index:self.x_train_index + batch_size]
         for sample_name in list_chosed:
             x,y = load_sample(config.train_folder_path, sample_name)
             x_train.append(x)
@@ -79,19 +86,23 @@ class DatasetLoader():
         # convert to numpy array
         self.x_train = np.array(x_train)
         self.y_train = np.array(y_train)
+        self.x_train = self.x_train / 255.0
+        self.x_train_index += batch_size
+        return True
 
-    def load_data_test_continuos(self):
+    def load_data_test_next(self, batch_size):
         x_test = []
         y_test = []
         # load data test
-        testing_samples = os.listdir(config.test_folder_path)
-        num_sample = self.x_test_max - self.x_test_index
-        if num_sample > config.testing_buffer:
-            num_sample = config.testing_buffer
-        elif num_sample <= 1:
+        if len(self.list_test_image_name) < batch_size:
+            batch_size = len(list_test_image_name)
+        if self.x_test_index + batch_size > len(self.list_test_image_name):
+            self.list_test_image_name = random.sample(self.list_test_image_name, len(self.list_test_image_name))
+            self.x_test_index = 0
             return False
-        for index in range(self.x_test_index, self.x_test_index + num_sample):
-            x, y = load_sample(config.test_folder_path, testing_samples[index])
+        list_chosed = self.list_test_image_name[self.x_test_index:self.x_test_index + batch_size]
+        for sample_name in list_chosed:
+            x, y = load_sample(config.test_folder_path, sample_name)
             x_test.append(x)
             y_test.append(y)
         # make one hot data
@@ -99,32 +110,15 @@ class DatasetLoader():
         # convert to numpy array
         self.x_test = np.array(x_test)
         self.y_test = np.array(y_test)
-        self.x_test_index += num_sample
+        self.x_test = self.x_test / 255.0
+        self.x_test_index += batch_size
         return True
     
-    def reset_data_test_index(self):
-        self.x_test_index = 0
-
-    def __batch_from_loaded(self, batch_size):
-        x_train = []
-        y_train = []
-        train_len = len(self.y_train)
-        select_list = random.sample(range(train_len), batch_size)
-        for select in select_list:
-            x_train.append(self.x_train[select])
-            y_train.append(self.y_train[select])
-        x_train = np.array(x_train)
-        y_train = np.array(y_train)
-        return x_train, y_train
-
-    def load_batch_dataset(self, batch_size):
-        return self.__batch_from_loaded(batch_size)
-
     def get_num_types(self):
         return self.dict_lables["num_type"]
     
     def get_num_train(self):
-        num_train = self.y_train.shape[0]
+        num_train = self.dict_lables["num_train"]
         return num_train
     
     def get_num_test(self):

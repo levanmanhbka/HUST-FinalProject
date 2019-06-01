@@ -14,6 +14,7 @@ dataset  = DatasetLoader()
 # General parameters of the model
 NUM_EPOCHS = 50
 BATCH_SIZE = 128
+
 DROPOUT_KEEP_PROB = 0.5
 K_BIAS = 2
 N_DEPTH_RADIUS = 5
@@ -26,7 +27,8 @@ image_height = config.image_height
 image_channel = config.image_channel
 image_types = dataset.get_num_types()
 
-model_path_name= "alex_model/"
+model_path_name= "alex_model"
+#model_path_name= config.root_path + "/code_project/alex_model" #for google colab
 
 # Placeholder variable for the input images
 x_train = tf.placeholder(tf.float32, shape=[None, image_width, image_height, image_channel], name='x_train')
@@ -141,8 +143,8 @@ with tf.name_scope("accuracy"):
 merged_summary = tf.summary.merge_all()
 
 # Initialize the FileWriter
-writer_train = tf.summary.FileWriter(model_path_name + "train")
-writer_valid = tf.summary.FileWriter(model_path_name + "valid")
+writer_train = tf.summary.FileWriter(model_path_name + "/train")
+writer_valid = tf.summary.FileWriter(model_path_name + "/valid")
 train_num_loop = 0
 valid_num_loop = 0
 print('Run `tensorboard --logdir=%s` to see the results.' % model_path_name)
@@ -161,12 +163,14 @@ with tf.Session() as sess:
     # Loop over number of eporchs
     for epoch in range(NUM_EPOCHS):
         print("training epoch ", epoch)
-        dataset.load_datasets_random(3000)
         start_time = time.time()
         train_accuracy = 0.0
-        for batch in range(0, int(dataset.get_num_train()/BATCH_SIZE)):
+        num_batch = int(dataset.get_num_train()/BATCH_SIZE + 1)
+        print("training epoch ", epoch, "num batch ", num_batch, " size batch ", BATCH_SZE)
+        for batch in range(0, num_batch):
             # Get a batch of images and labels
-            x_batch, y_batch = dataset.load_batch_dataset(BATCH_SIZE)
+            dataset.load_data_train_next(BATCH_SIZE)
+            x_batch, y_batch = dataset.x_train, dataset.y_train
             # Put the batch into a dict with the proper names for placeholder variables
             feed_dict_train = {x_train: x_batch, y_true: y_batch}
             # Run the optimizer using this batch of training data.
@@ -179,14 +183,14 @@ with tf.Session() as sess:
             train_num_loop += 1
         
         saver.save(sess, os.path.join(model_path_name, "model.ckpt"))
-        
-        train_accuracy = train_accuracy / (dataset.get_num_train()/BATCH_SIZE)
+        print("model saved:", os.path.join(model_path_name, "model.ckpt"))
+        train_accuracy /= num_batch
+
         # Validate the model on the entire validation set
         print("validating epoch ", epoch)
         vali_accuracy = 0
-        num_test_patch = 0
-        dataset.reset_data_test_index()
-        while dataset.load_data_test_continuos():
+        num_test_patch = 0.001
+        while dataset.load_data_test_next(BATCH_SIZE):
             summ, vali_accuracy_temp = sess.run([merged_summary, accuracy], feed_dict={x_train:dataset.x_test, y_true:dataset.y_test})
             writer_valid.add_summary(summ, valid_num_loop)
             vali_accuracy += vali_accuracy_temp

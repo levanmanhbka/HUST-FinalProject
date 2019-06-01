@@ -13,7 +13,8 @@ dataset  = DatasetLoader()
 layers = Layers()
 
 # Save model
-model_path_name= "bknet_model/"
+model_path_name= "bknet_model"
+#model_path_name= config.root_path + "/code_project/bknet_model" #for google colab
 
 # Config trainning
 NUM_EPOCHS = 50
@@ -140,8 +141,8 @@ with tf.name_scope("accuracy"):
 merged_summary = tf.summary.merge_all()
 
 # Initialize the FileWriter
-writer_train = tf.summary.FileWriter(model_path_name + "train")
-writer_valid = tf.summary.FileWriter(model_path_name + "valid")
+writer_train = tf.summary.FileWriter(model_path_name + "/train")
+writer_valid = tf.summary.FileWriter(model_path_name + "/valid")
 train_num_loop = 0
 valid_num_loop = 0
 print('Run `tensorboard --logdir=%s` to see the results.' % model_path_name)
@@ -163,10 +164,12 @@ with tf.Session() as sess:
         print("training epoch ", epoch)
         start_time = time.time()
         train_accuracy = 0
-        for batch in range(0, int(dataset.get_num_train()/BATCH_SZE)):
+        num_batch = int(dataset.get_num_train()/BATCH_SZE + 1)
+        print("training epoch ", epoch, "num batch ", num_batch, " size batch ", BATCH_SZE)
+        for batch in range(0, num_batch):
             # Get a batch of images and labels
-            dataset.load_datasets_random(config.training_buffer)
-            x_batch, y_batch = dataset.load_batch_dataset(BATCH_SZE)
+            dataset.load_data_train_next(BATCH_SZE)
+            x_batch, y_batch = dataset.x_train, dataset.y_train
             # Put the batch into a dict with the proper names for placeholder variables
             feed_dict_train = {x_train: x_batch, y_true: y_batch}
             # Run the optimizer using this batch of training data.
@@ -179,14 +182,14 @@ with tf.Session() as sess:
             train_num_loop += 1
 
         saver.save(sess, os.path.join(model_path_name, "model.ckpt"))
-
-        train_accuracy /= int(dataset.get_num_train()/BATCH_SZE)
+        print("model saved:", os.path.join(model_path_name, "model.ckpt"))
+        train_accuracy /= num_batch
+        
         # Generate summary and validate the model on the entire validation set
         print("validating epoch ", epoch)
         vali_accuracy = 0
-        num_test_patch = 0
-        dataset.reset_data_test_index()
-        while dataset.load_data_test_continuos():
+        num_test_patch = 0.001
+        while dataset.load_data_test_next(BATCH_SZE):
             summ, vali_accuracy_temp = sess.run([merged_summary, accuracy], feed_dict={x_train:dataset.x_test, y_true:dataset.y_test})
             writer_valid.add_summary(summ, valid_num_loop)
             vali_accuracy += vali_accuracy_temp

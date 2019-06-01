@@ -8,7 +8,7 @@ import network_config as config
 
 np.set_printoptions(precision=4)
 
-model_path_name= "bknet_model/"
+model_path_name= "bknet_model"
 
 # image param
 with open(config.lable_file_name) as json_file:    

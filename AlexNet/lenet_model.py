@@ -13,11 +13,12 @@ dataset  = DatasetLoader()
 layers = Layers()
 
 # Save model
-model_path_name= "lenet_model/"
+model_path_name= "lenet_model"
+#model_path_name= config.root_path + "/code_project/lenet_model" #for google colab
 
 # Config trainning
 NUM_EPOCHS = 50
-BATCH_SZE = 128
+BATCH_SIZE = 128
 
 # Model parameters
 image_width = config.image_width
@@ -30,53 +31,64 @@ x_train = tf.placeholder(tf.float32, shape=[None, image_width, image_height, ima
 # Placeholder variable for the true labels associated with the images
 y_true = tf.placeholder(tf.float32, shape=[None, image_types], name='y_true')
 
-# Convolutional Layer 1
+# conv1 | relu1 | pooling1
 layer_conv1, weights_conv1 = layers.new_conv_layer(input_tensor=x_train, input_channel= image_channel, 
-filter_size=5, filter_num=8, filter_stride=[1, 1, 1, 1], filter_padding="SAME",name ="conv1")
+filter_size=3, filter_num=8, filter_stride=[1, 1, 1, 1], filter_padding="SAME",name ="conv1")
+layer_conv1 = layers.new_relu_layer(layer_conv1, name="relu1")
 print(layer_conv1)
-# Pooling Layer 1
 layer_conv1 = layers.new_pool_layer(input_tensor=layer_conv1, 
 ker_size=[1, 2, 2, 1], ker_stride=[1, 2, 2, 1], ker_padding="SAME",name="pool1")
 print(layer_conv1)
-# RelU layer 1
-layer_conv1 = layers.new_relu_layer(layer_conv1, name="relu1")
-print(layer_conv1)
 
-# Convolutional Layer 2
+
+# conv2 | relu2 | pooling2
 layer_conv2, weights_conv2 = layers.new_conv_layer(input_tensor=layer_conv1, input_channel= 8, 
-filter_size=5, filter_num=16, filter_stride=[1, 1, 1, 1], filter_padding="SAME",name ="conv2")
+filter_size=3, filter_num=16, filter_stride=[1, 1, 1, 1], filter_padding="SAME",name ="conv2")
+layer_conv2 = layers.new_relu_layer(layer_conv2, name="relu2")
 print(layer_conv2)
-# Pooling Layer 2
 layer_conv2 = layers.new_pool_layer(input_tensor=layer_conv2, 
 ker_size=[1, 2, 2, 1], ker_stride=[1, 2, 2, 1], ker_padding="SAME",name="pool2")
 print(layer_conv2)
-# RelU layer 2
-layer_conv2 = layers.new_relu_layer(layer_conv2, name="relu2")
-print(layer_conv2)
 
 
-# Convolutional Layer 3
+# conv3 | relu3 | pooling3
 layer_conv3, weights_conv3 = layers.new_conv_layer(input_tensor=layer_conv2, input_channel= 16, 
-filter_size=5, filter_num=32, filter_stride=[1, 1, 1, 1], filter_padding="SAME",name ="conv3")
+filter_size=3, filter_num=32, filter_stride=[1, 1, 1, 1], filter_padding="SAME",name ="conv3")
+layer_conv3 = layers.new_relu_layer(layer_conv3, name="relu3")
 print(layer_conv3)
-# Pooling Layer 3
 layer_conv3 = layers.new_pool_layer(input_tensor=layer_conv3, 
 ker_size=[1, 2, 2, 1], ker_stride=[1, 2, 2, 1], ker_padding="SAME",name="pool3")
 print(layer_conv3)
-# RelU layer 3
-layer_conv3 = layers.new_relu_layer(layer_conv3, name="relu3")
-print(layer_conv3)
+
+# conv4 | relu4 | pooling4
+layer_conv4, weights_conv4 = layers.new_conv_layer(input_tensor=layer_conv3, input_channel= 32, 
+filter_size=3, filter_num=64, filter_stride=[1, 1, 1, 1], filter_padding="SAME",name ="conv4")
+layer_conv4 = layers.new_relu_layer(layer_conv4, name="relu4")
+print(layer_conv4)
+layer_conv4 = layers.new_pool_layer(input_tensor=layer_conv4, 
+ker_size=[1, 2, 2, 1], ker_stride=[1, 2, 2, 1], ker_padding="SAME",name="pool4")
+print(layer_conv4)
+
+# conv5 | relu5 | pooling5
+layer_conv5, weights_conv5 = layers.new_conv_layer(input_tensor=layer_conv4, input_channel= 64, 
+filter_size=3, filter_num=128, filter_stride=[1, 1, 1, 1], filter_padding="SAME",name ="conv5")
+layer_conv5 = layers.new_relu_layer(layer_conv5, name="relu5")
+print(layer_conv5)
+layer_conv5 = layers.new_pool_layer(input_tensor=layer_conv5, 
+ker_size=[1, 2, 2, 1], ker_stride=[1, 2, 2, 1], ker_padding="SAME",name="pool5")
+print(layer_conv5)
+
 
 # Flatten Layer
-num_features = layer_conv3.get_shape()[1:4].num_elements()
-layer_flat = tf.reshape(layer_conv3, [-1, num_features])
+num_features = layer_conv5.get_shape()[1:4].num_elements()
+layer_flat = tf.reshape(layer_conv5, [-1, num_features])
 print(layer_flat)
 
 # Fully-Connected Layer 1
 layer_fc1 = layers.new_fc_layer(layer_flat, num_inputs=num_features, num_outputs=128, name="fc1")
 print(layer_fc1)
 # RelU layer 4
-layer_relu4 = layers.new_relu_layer(layer_fc1, name="relu4")
+layer_relu4 = layers.new_relu_layer(layer_fc1, name="relu6")
 print(layer_relu4)
 
 # Fully-Connected Layer 2
@@ -107,8 +119,8 @@ with tf.name_scope("accuracy"):
 merged_summary = tf.summary.merge_all()
 
 # Initialize the FileWriter
-writer_train = tf.summary.FileWriter(model_path_name + "train")
-writer_valid = tf.summary.FileWriter(model_path_name + "valid")
+writer_train = tf.summary.FileWriter(model_path_name + "/train")
+writer_valid = tf.summary.FileWriter(model_path_name + "/valid")
 train_num_loop = 0
 valid_num_loop = 0
 print('Run `tensorboard --logdir=%s` to see the results.' % model_path_name)
@@ -127,13 +139,14 @@ with tf.Session() as sess:
     writer_train.add_graph(sess.graph)
     # Loop over number of epochs
     for epoch in range(NUM_EPOCHS):
-        print("training epoch ", epoch)
         start_time = time.time()
         train_accuracy = 0
-        for batch in range(0, int(dataset.get_num_train()/BATCH_SZE)):
+        num_batch = int(dataset.get_num_train()/BATCH_SIZE + 1)
+        print("training epoch ", epoch, "num batch ", num_batch, " size batch ", BATCH_SIZE)
+        for batch in range(0, num_batch):
             # Get a batch of images and labels
-            dataset.load_datasets_random(config.training_buffer)
-            x_batch, y_batch = dataset.load_batch_dataset(BATCH_SZE)
+            dataset.load_data_train_next(BATCH_SIZE)
+            x_batch, y_batch = dataset.x_train, dataset.y_train
             # Put the batch into a dict with the proper names for placeholder variables
             feed_dict_train = {x_train: x_batch, y_true: y_batch}
             # Run the optimizer using this batch of training data.
@@ -146,14 +159,14 @@ with tf.Session() as sess:
             train_num_loop += 1
 
         saver.save(sess, os.path.join(model_path_name, "model.ckpt"))
-
-        train_accuracy /= int(dataset.get_num_train()/BATCH_SZE)
+        print("model saved:", os.path.join(model_path_name, "model.ckpt"))
+        train_accuracy /= num_batch
+        
         # Generate summary and validate the model on the entire validation set
         print("validating epoch ", epoch)
         vali_accuracy = 0
-        num_test_patch = 0
-        dataset.reset_data_test_index()
-        while dataset.load_data_test_continuos():
+        num_test_patch = 0.001
+        while dataset.load_data_test_next(BATCH_SIZE):
             summ, vali_accuracy_temp = sess.run([merged_summary, accuracy], feed_dict={x_train:dataset.x_test, y_true:dataset.y_test})
             writer_valid.add_summary(summ, valid_num_loop)
             vali_accuracy += vali_accuracy_temp
