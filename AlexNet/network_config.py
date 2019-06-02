@@ -4,7 +4,7 @@ image_channel = 3
 training_buffer = 1000
 testing_buffer = 100
 
-input_folder_path = "lanmark"
+input_folder_path = "lanscape"
 train_folder_path = "train_folder"
 test_folder_path = "test_folder"
-lable_file_name = "data_lable.json"
+lable_file_name = "data_label.json"

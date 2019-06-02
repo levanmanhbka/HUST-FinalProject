@@ -43,12 +43,12 @@ print(layer_conv1)
 # Normalize layer 1
 layer_conv1 = tf.nn.lrn(layer_conv1, depth_radius=N_DEPTH_RADIUS, bias=K_BIAS, alpha=ALPHA, beta=BETA)
 print(layer_conv1)
+# RelU layer 1
+layer_conv1 = layers.new_relu_layer(layer_conv1, name="relu1")
+print(layer_conv1)
 # Pooling layer 1
 layer_conv1 = layers.new_pool_layer(input_tensor=layer_conv1, 
 ker_size=[1, 3, 3, 1], ker_stride=[1, 2, 2, 1], ker_padding="VALID",name="pool1")
-print(layer_conv1)
-# RelU layer 1
-layer_conv1 = layers.new_relu_layer(layer_conv1, name="relu1")
 print(layer_conv1)
 
 # Convolution Layer 2 | Response Normalization | Max Pooling | ReLU
@@ -59,13 +59,14 @@ print(layer_conv2)
 # Normalize layer 2
 layer_conv2 = tf.nn.lrn(layer_conv2, depth_radius=N_DEPTH_RADIUS, bias=K_BIAS, alpha=ALPHA, beta=BETA)
 print(layer_conv2)
+# RelU layer 2
+layer_conv2 = layers.new_relu_layer(layer_conv2, name="relu2")
+print(layer_conv2)
 # Pooling layer 2
 layer_conv2 = layers.new_pool_layer(input_tensor=layer_conv2, 
 ker_size=[1, 3, 3, 1], ker_stride=[1, 2, 2, 1], ker_padding="VALID",name="pool2")
 print(layer_conv2)
-# RelU layer 2
-layer_conv2 = layers.new_relu_layer(layer_conv2, name="relu2")
-print(layer_conv2)
+
 
 # Convolution Layer 3 | ReLU
 print("Convolutional Layer 3")
@@ -115,7 +116,7 @@ fc_layer_2 = tf.nn.dropout(fc_layer_2, keep_prob=DROPOUT_KEEP_PROB)
 print(fc_layer_2)
 
 # Fully Connected Layer 3 | Softmax
-fc_layer_3 = layers.new_fc_layer(input=fc_layer_1, num_inputs=4096, num_outputs= image_types, name="fc_layer2")
+fc_layer_3 = layers.new_fc_layer(input=fc_layer_2, num_inputs=4096, num_outputs= image_types, name="fc_layer3")
 print(fc_layer_3)
 
 
@@ -160,13 +161,18 @@ with tf.Session() as sess:
     # saver.restore(sess, os.path.join(model_path_name, 'model.ckpt'))
     # Add the model graph to TensorBoard
     writer_train.add_graph(sess.graph)
+    saver.save(sess, os.path.join(model_path_name, "model.ckpt"))
+    exit()
     # Loop over number of eporchs
     for epoch in range(NUM_EPOCHS):
-        print("training epoch ", epoch)
+        epoch_test = int(dataset.get_num_test() / BATCH_SIZE)
+        train_intev = int(dataset.get_num_train() / BATCH_SIZE / epoch_test)
+        epoch_train = 0
+        print("num_train=", dataset.get_num_train(), " num_test=", dataset.get_num_test(), " train_intev=", train_intev)
         start_time = time.time()
         train_accuracy = 0.0
-        num_batch = int(dataset.get_num_train()/BATCH_SIZE + 1)
-        print("training epoch ", epoch, "num batch ", num_batch, " size batch ", BATCH_SZE)
+        num_batch = int(dataset.get_num_train()/BATCH_SIZE)
+        print("training epoch ", epoch, "num batch ", num_batch, " size batch ", BATCH_SIZE)
         for batch in range(0, num_batch):
             # Get a batch of images and labels
             dataset.load_data_train_next(BATCH_SIZE)
@@ -178,9 +184,11 @@ with tf.Session() as sess:
             # Calculate the accuracy on the batch of training data
             train_accuracy += sess.run(accuracy, feed_dict=feed_dict_train)
             # Generate summary with the current batch of data and write to file
-            summ = sess.run(merged_summary, feed_dict=feed_dict_train)
-            writer_train.add_summary(summ, train_num_loop)
-            train_num_loop += 1
+            if epoch_train % train_intev == 0:
+                summ = sess.run(merged_summary, feed_dict=feed_dict_train)
+                writer_train.add_summary(summ, train_num_loop)
+                train_num_loop += 1
+            epoch_train += 1
         
         saver.save(sess, os.path.join(model_path_name, "model.ckpt"))
         print("model saved:", os.path.join(model_path_name, "model.ckpt"))
