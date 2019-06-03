@@ -14,6 +14,12 @@ def create_dataset_folder():
     if not os.path.exists(config.test_folder_path):
         os.mkdir(config.test_folder_path)
 
+def crop_random_image(img, width, height):
+    w, h, c = img.shape
+    x = random.randint(0, w - width)
+    y = random.randint(0, h - height)
+    return img[y:y+height, x:x+width]
+
  #3 separate folder part of samples to train, 1 part of samples to test
 def separate_folder(src_folder, id_class):
     list_src_image = os.listdir(src_folder)
@@ -29,33 +35,45 @@ def separate_folder(src_folder, id_class):
     train_number = 0
     test_number = 0
 
-    for file_name in list_train_image:
-        src_file = src_folder + "/" + file_name
-        dst_file = config.train_folder_path + "/" + str(id_class) + "_" + str(train_number) + ".jpg"
-        image = cv.imread(src_file)
-        if image is None:
-            os.remove(src_file)
-        elif len(image.shape) == 3:
-            image = cv.resize(image, (config.image_width, config.image_height))
-            cv.imwrite(dst_file, image)
-            train_number = train_number + 1
-            file_number = file_number + 1
-        else:
-            os.remove(src_file)
+    while train_number < config.num_train_file:
+        for file_name in list_train_image:
+            src_file = src_folder + "/" + file_name
+            dst_file = config.train_folder_path + "/" + str(id_class) + "_" + str(train_number) + ".jpg"
+            image = cv.imread(src_file)
+            if image is None:
+                os.remove(src_file)
+            elif len(image.shape) == 3:
+                if train_number < len(list_train_image):
+                    image = cv.resize(image, (config.image_width, config.image_height))
+                else:
+                    image = crop_random_image(image, config.image_width, config.image_height)
+                cv.imwrite(dst_file, image)
+                train_number = train_number + 1
+                file_number = file_number + 1
+            else:
+                os.remove(src_file)
+            if train_number >= config.num_train_file:
+                break
 
-    for file_name in list_test_image:
-        src_file = src_folder + "/" + file_name
-        dst_file = config.test_folder_path + "/" + str(id_class) + "_" + str(test_number) + ".jpg"
-        image = cv.imread(src_file)
-        if image is None:
-            os.remove(src_file)
-        elif len(image.shape) == 3:
-            image = cv.resize(image, (config.image_width, config.image_height))
-            cv.imwrite(dst_file, image)
-            test_number = test_number + 1
-            file_number = file_number + 1
-        else:
-            os.remove(src_file)
+    while test_number < config.num_test_file:
+        for file_name in list_test_image:
+            src_file = src_folder + "/" + file_name
+            dst_file = config.test_folder_path + "/" + str(id_class) + "_" + str(test_number) + ".jpg"
+            image = cv.imread(src_file)
+            if image is None:
+                os.remove(src_file)
+            elif len(image.shape) == 3:
+                if test_number < len(list_test_image):
+                    image = cv.resize(image, (config.image_width, config.image_height))
+                else:
+                    image = crop_random_image(image, config.image_width, config.image_height)
+                cv.imwrite(dst_file, image)
+                test_number = test_number + 1
+                file_number = file_number + 1
+            else:
+                os.remove(src_file)
+            if test_number >= config.num_test_file:
+                break
         
         
     return file_number, test_number, train_number
