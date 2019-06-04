@@ -128,19 +128,19 @@ layer_flat = tf.reshape(layer_conv5, [-1, num_features])
 print(layer_flat)
 
 # Fully-Connected Layer 1
-layer_fc1 = layers.new_fc_layer(layer_flat, num_inputs=num_features, num_outputs=4096, name="fc1")
+layer_fc1 = layers.new_fc_layer(layer_flat, num_inputs=num_features, num_outputs=1024, name="fc1")
 # RelU layer 4
 layer_relu6 = layers.new_relu_layer(layer_fc1, name="relu6")
 print(layer_relu6)
 
 # Fully-Connected Layer 2
-layer_fc2 = layers.new_fc_layer(layer_relu6, num_inputs=4096, num_outputs=4096, name="fc2")
+layer_fc2 = layers.new_fc_layer(layer_relu6, num_inputs=1024, num_outputs=1024, name="fc2")
 # RelU layer 4
 layer_relu7 = layers.new_relu_layer(layer_fc2, name="relu7")
 print(layer_relu7)
 
 # Fully-Connected Layer 3
-layer_output = layers.new_fc_layer(input=layer_relu7, num_inputs=4096, num_outputs=image_types, name="fc3")
+layer_output = layers.new_fc_layer(input=layer_relu7, num_inputs=1024, num_outputs=image_types, name="fc3")
 print(layer_output)
 
 # Use Softmax function to normalize the output

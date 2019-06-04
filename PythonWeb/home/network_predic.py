@@ -41,10 +41,10 @@ def predict_image_function(image_name):
     session = tf.Session()
 
     # create a saver object to load the model
-    saver = tf.train.import_meta_graph(os.path.join(model_save_name, '.meta'))
+    saver = tf.train.import_meta_graph(os.path.join(model_save_name, 'model.ckpt.meta'))
 
     # restore the model from our checkpoints folder
-    saver.restore(session, os.path.join(model_save_name, '.\\'))
+    saver.restore(session, os.path.join(model_save_name, 'model.ckpt'))
 
     # create graph object for getting the same network architecture
     graph = tf.get_default_graph()

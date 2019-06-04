@@ -69,11 +69,11 @@ tensor = tf.reshape(tensor, [-1, len_tensor])
 print(tensor)
 
 # Fully Connected Layer 1 | Dropout
-tensor = layers.new_fc_layer(input=tensor, num_inputs=len_tensor, num_outputs= 4096, name="fc_layer1")
+tensor = layers.new_fc_layer(input=tensor, num_inputs=len_tensor, num_outputs= 1024, name="fc_layer1")
 print(tensor)
 
 # Fully Connected Layer 2
-layer_output = layers.new_fc_layer(input=tensor, num_inputs=4096, num_outputs= image_types, name="fc_layer2")
+layer_output = layers.new_fc_layer(input=tensor, num_inputs=1024, num_outputs= image_types, name="fc_layer2")
 print(layer_output)
 
 
@@ -89,7 +89,7 @@ with tf.name_scope("cross_cost"):
 
 # Use Adam Optimizer
 with tf.name_scope("optimizer"):
-    optimizer = tf.train.AdamOptimizer(learning_rate=1e-4).minimize(cost)
+    optimizer = tf.train.AdamOptimizer(learning_rate=5e-5).minimize(cost)
 
 # Accuracy
 with tf.name_scope("accuracy"):
