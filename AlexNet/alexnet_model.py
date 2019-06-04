@@ -106,17 +106,17 @@ feature_map = tf.reshape(layer_conv5, [-1, num_features])
 print(feature_map)
 
 # Fully Connected Layer 1 | Dropout
-fc_layer_1 = layers.new_fc_layer(input=feature_map, num_inputs=num_features, num_outputs= 4096, name="fc_layer1")
+fc_layer_1 = layers.new_fc_layer(input=feature_map, num_inputs=num_features, num_outputs= 2048, name="fc_layer1")
 fc_layer_1 = tf.nn.dropout(fc_layer_1, keep_prob=DROPOUT_KEEP_PROB)
 print(fc_layer_1)
 
 # Fully Connected Layer 2 | Dropout
-fc_layer_2 = layers.new_fc_layer(input=fc_layer_1, num_inputs=4096, num_outputs= 4096, name="fc_layer2")
+fc_layer_2 = layers.new_fc_layer(input=fc_layer_1, num_inputs=2048, num_outputs= 2048, name="fc_layer2")
 fc_layer_2 = tf.nn.dropout(fc_layer_2, keep_prob=DROPOUT_KEEP_PROB)
 print(fc_layer_2)
 
 # Fully Connected Layer 3 | Softmax
-fc_layer_3 = layers.new_fc_layer(input=fc_layer_2, num_inputs=4096, num_outputs= image_types, name="fc_layer3")
+fc_layer_3 = layers.new_fc_layer(input=fc_layer_2, num_inputs=2048, num_outputs= image_types, name="fc_layer3")
 print(fc_layer_3)
 
 
