@@ -7,8 +7,9 @@ from django.core.files.storage import FileSystemStorage
 from .reoder_lanmark import ReoderLanmark
 
 # Create your views here.
-def index(request):
-    lanmarks =  {"lanmarks":Lanmark.objects.all().order_by("num")}
+def index(request, uploaded= "default"):
+    print("uploaded= ", uploaded)
+    lanmarks =  {"lanmarks":Lanmark.objects.all().order_by("num"), "uploaded":uploaded}
     return render(request, "pages/home.html", lanmarks)
 
 def detail(request, id):
@@ -20,7 +21,7 @@ class IndexView(ListView):
     queryset = Lanmark.objects.all().order_by("num")
     template_name = "pages/home.html"
     context_object_name = "lanmarks"
-    paginate_by = 12
+    paginate_by = 100
 
 class LanmarkDetail(DetailView):
     model = Lanmark
@@ -38,4 +39,4 @@ def upload_file(request):
         # Use machine learning to reoder list post
         reoder = ReoderLanmark()
         reoder.get_new_order(str(fs.location) + str("/uploaded/") + str(myfile.name))
-    return index(request)
+    return index(request, str("uploaded/") + str(myfile.name))
