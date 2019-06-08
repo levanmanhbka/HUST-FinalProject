@@ -5,6 +5,8 @@ from dataset_loader import DatasetLoader
 import network_config as config
 from cnn_layers import Layers
 import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+os.environ["CUDA_VISIBLE_DEVICES"] = "0" 
 
 # Datasets
 dataset  = DatasetLoader()
@@ -30,6 +32,8 @@ image_types = dataset.get_num_types()
 x_train = tf.placeholder(tf.float32, shape=[None, image_width, image_height, image_channel], name='x_train')
 # Placeholder variable for the true labels associated with the images
 y_true = tf.placeholder(tf.float32, shape=[None, image_types], name='y_true')
+# Using in dropout layer
+dropout_rate = tf.placeholder(tf.float32, name='dropout_rate')
 
 tensor = layers.new_conv_bn_relu_layer(x_train, [7, 7, 3, 64], 2, "conv10")
 print(tensor)
@@ -67,13 +71,20 @@ print(tensor)
 len_tensor = tensor.get_shape()[1:4].num_elements()
 tensor = tf.reshape(tensor, [-1, len_tensor])
 print(tensor)
+tensor = tf.nn.dropout(x=tensor, rate = dropout_rate)
 
-# Fully Connected Layer 1 | Dropout
-tensor = layers.new_fc_layer(input=tensor, num_inputs=len_tensor, num_outputs= 1024, name="fc_layer1")
+# Fully Connected Layer 1 | Dropout 1
+tensor = layers.new_fc_layer(input=tensor, num_inputs=len_tensor, num_outputs= 512, name="fc_layer1")
 print(tensor)
+tensor = tf.nn.dropout(x=tensor, rate = dropout_rate)
 
-# Fully Connected Layer 2
-layer_output = layers.new_fc_layer(input=tensor, num_inputs=1024, num_outputs= image_types, name="fc_layer2")
+# Fully Connected Layer 2 | Dropout 2
+tensor = layers.new_fc_layer(input=tensor, num_inputs=512, num_outputs= 128, name="fc_layer2")
+print(tensor)
+tensor = tf.nn.dropout(x=tensor, rate = dropout_rate)
+
+# Fully Connected Layer 3
+layer_output = layers.new_fc_layer(input=tensor, num_inputs=128, num_outputs= image_types, name="fc_layer3")
 print(layer_output)
 
 
@@ -89,7 +100,7 @@ with tf.name_scope("cross_cost"):
 
 # Use Adam Optimizer
 with tf.name_scope("optimizer"):
-    optimizer = tf.train.AdamOptimizer(learning_rate=5e-5).minimize(cost)
+    optimizer = tf.train.AdamOptimizer(learning_rate=1e-4).minimize(cost)
 
 # Accuracy
 with tf.name_scope("accuracy"):
@@ -119,8 +130,8 @@ with tf.Session() as sess:
     # saver.restore(sess, os.path.join(model_path_name, 'model.ckpt'))
     # Add the model graph to TensorBoard
     writer_train.add_graph(sess.graph)
-    saver.save(sess, os.path.join(model_path_name, "model.ckpt"))
-    exit()
+    # saver.save(sess, os.path.join(model_path_name, "model.ckpt"))
+    # exit()
     # Loop over number of epochs
     for epoch in range(NUM_EPOCHS):
         num_batch = int(dataset.get_num_train()/BATCH_SIZE)
@@ -136,10 +147,11 @@ with tf.Session() as sess:
             dataset.load_data_train_next(BATCH_SIZE)
             x_batch, y_batch = dataset.x_train, dataset.y_train
             # Put the batch into a dict with the proper names for placeholder variables
-            feed_dict_train = {x_train: x_batch, y_true: y_batch}
+            feed_dict_train = {x_train: x_batch, y_true: y_batch, dropout_rate: 0.6}
             # Run the optimizer using this batch of training data.
             sess.run(optimizer, feed_dict=feed_dict_train)
             # Calculate the accuracy on the batch of training data
+            feed_dict_train = {x_train: x_batch, y_true: y_batch, dropout_rate: 0.0}
             train_accuracy += sess.run(accuracy, feed_dict=feed_dict_train)
             # Generate summary with the current batch of data and write to file
             epoch_train += 1
@@ -157,7 +169,7 @@ with tf.Session() as sess:
         vali_accuracy = 0
         num_test_patch = 0.001
         while dataset.load_data_test_next(BATCH_SIZE):
-            summ, vali_accuracy_temp = sess.run([merged_summary, accuracy], feed_dict={x_train:dataset.x_test, y_true:dataset.y_test})
+            summ, vali_accuracy_temp = sess.run([merged_summary, accuracy], feed_dict={x_train:dataset.x_test, y_true:dataset.y_test, dropout_rate:0.0})
             writer_valid.add_summary(summ, valid_num_loop)
             vali_accuracy += vali_accuracy_temp
             num_test_patch += 1.0
@@ -170,4 +182,5 @@ with tf.Session() as sess:
         print("Epoch "+str(epoch+1)+" completed : Time usage "+str(int(end_time-start_time))+" seconds")
         print("\t- Training Accuracy:\t{}".format(train_accuracy))
         print("\t- Validation Accuracy:\t{}".format(vali_accuracy))
+        print(cost)
         print("")
