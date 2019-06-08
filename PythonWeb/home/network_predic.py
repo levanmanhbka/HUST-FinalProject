@@ -13,6 +13,22 @@ def crop_center(img, cropx, cropy):
     starty = y//2-(cropy//2)
     return img[starty:starty+cropy, startx:startx+cropx]
 
+def get_sorted_index(my_list):
+    index = 0
+    dict_pare = {}
+    for value in my_list:
+        dict_pare[str(index)] = value
+        index += 1
+    dict_pare = dict(sorted(dict_pare.items(), key=lambda x: x[1], reverse=True))
+    #print(dict_pare)
+    list_index_str = dict_pare.keys()
+    #print(list_index_str)
+    list_index_num = []
+    for index in list_index_str:
+        list_index_num.append(int(index))
+    print(list_index_num)
+    return list_index_num
+
 def predict_image_function(image_name):
     model_save_name = "home/model"
     
@@ -67,6 +83,6 @@ def predict_image_function(image_name):
     # show data
     print(result)
     print(dict_lables[str(np.argmax(result[0]))])
-
+    result = get_sorted_index(result)
     return result
 

@@ -22,3 +22,4 @@ class ReoderLanmark():
         cv.imshow("image", image)
         cv.waitKey(2000)
         cv.destroyAllWindows()
+        return predict_result
