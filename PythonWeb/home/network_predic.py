@@ -73,6 +73,7 @@ def predict_image_function(image_name):
     label_ph = graph.get_tensor_by_name("y_true:0")
 
     # inorder to make the output to be either 0 or 1.
+    network = tf.nn.l2_normalize(x=network, axis=[0 , 1])
     network = tf.nn.softmax(network)
 
     # creating the feed_dict that is required to be fed to calculate y_pred

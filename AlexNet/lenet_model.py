@@ -137,17 +137,17 @@ with tf.Session() as sess:
     # saver.restore(sess, os.path.join(model_path_name, 'model.ckpt'))
     # Add the model graph to TensorBoard
     writer_train.add_graph(sess.graph)
-    saver.save(sess, os.path.join(model_path_name, "model.ckpt"))
-    exit()
+    # saver.save(sess, os.path.join(model_path_name, "model.ckpt"))
+    # exit()
     # Loop over number of epochs
     for epoch in range(NUM_EPOCHS):
+        num_batch = int(dataset.get_num_train()/BATCH_SIZE)
         epoch_test = int(dataset.get_num_test() / BATCH_SIZE)
-        train_intev = int(dataset.get_num_train() / BATCH_SIZE / epoch_test)
+        train_intev = int(num_batch / epoch_test)
         epoch_train = 0
         print("num_train=", dataset.get_num_train(), " num_test=", dataset.get_num_test(), " train_intev=", train_intev)
         start_time = time.time()
         train_accuracy = 0
-        num_batch = int(dataset.get_num_train()/BATCH_SIZE)
         print("training epoch ", epoch, "num batch ", num_batch, " size batch ", BATCH_SIZE)
         for batch in range(0, num_batch):
             # Get a batch of images and labels
@@ -160,11 +160,12 @@ with tf.Session() as sess:
             # Calculate the accuracy on the batch of training data
             train_accuracy += sess.run(accuracy, feed_dict=feed_dict_train)
             # Generate summary with the current batch of data and write to file
+            epoch_train += 1
             if epoch_train % train_intev == 0:
                 summ = sess.run(merged_summary, feed_dict=feed_dict_train)
                 writer_train.add_summary(summ, train_num_loop)
                 train_num_loop += 1
-            epoch_train += 1
+            
 
         saver.save(sess, os.path.join(model_path_name, "model.ckpt"))
         print("model saved:", os.path.join(model_path_name, "model.ckpt"))
@@ -184,6 +185,7 @@ with tf.Session() as sess:
         
         end_time = time.time()
         
+        print("train_num_loop= ", train_num_loop, " valid_num_loop= ", valid_num_loop)
         print("Epoch "+str(epoch+1)+" completed : Time usage "+str(int(end_time-start_time))+" seconds")
         print("\t- Training Accuracy:\t{}".format(train_accuracy))
         print("\t- Validation Accuracy:\t{}".format(vali_accuracy))
