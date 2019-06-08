@@ -71,19 +71,20 @@ def predict_image_function(image_name):
     # create placeholders to pass the image and get output labels
     im_ph = graph.get_tensor_by_name("x_train:0")
     label_ph = graph.get_tensor_by_name("y_true:0")
+    dropout_rate = graph.get_tensor_by_name("dropout_rate:0")
 
     # inorder to make the output to be either 0 or 1.
     network = tf.nn.l2_normalize(x=network, axis=[0 , 1])
     network = tf.nn.softmax(network)
 
     # creating the feed_dict that is required to be fed to calculate y_pred
-    feed_dict_testing = {im_ph: predict_img, label_ph: labels}
+    feed_dict_testing = {im_ph: predict_img, label_ph: labels, dropout_rate:0.0}
 
     result = session.run(network, feed_dict=feed_dict_testing)
 
     # show data
     print(result)
     print(dict_lables[str(np.argmax(result[0]))])
-    result = get_sorted_index(result)
+    result = get_sorted_index(result[0])
     return result
 

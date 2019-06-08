@@ -26,7 +26,7 @@
         <form class="form-inline" action="upload" method="post" enctype="multipart/form-data">
           {% csrf_token %}
           <input type="file" name="myfile" class="btn-dark" style="margin-left: auto; margin-right: auto">
-          <button type="submit" class="btn-success" style="margin-left: auto; margin-right: auto; margin-top:10px">Upload Your Image</button>
+          <button type="submit" class="btn-success" style="margin-left: auto; margin-right: auto; margin-top:10px">Find Image Infomation</button>
         </form>
     </div>
 </div>
@@ -42,7 +42,7 @@
                 <a href="{{lanmark.id}}">
                   <img src="{{lanmark.image.url}}" alt="Lights" style="width:100%">
                   <div class="caption">
-                    <center>{{lanmark.title}}</center>
+                    <center>{{lanmark.num}}-{{lanmark.title}}</center>
                   </div>
                 </a>
               </div>
