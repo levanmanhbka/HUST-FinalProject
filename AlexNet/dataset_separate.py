@@ -16,8 +16,10 @@ def create_dataset_folder():
 
 def crop_random_image(img, width, height):
     w, h, c = img.shape
-    x = random.randint(0, w - width)
-    y = random.randint(0, h - height)
+    rx = w - width
+    ry = h - height
+    x = random.randint(int(rx/4), int(rx*3/4))
+    y = random.randint(int(ry/4), int(ry*3/4))
     return img[y:y+height, x:x+width]
 
  #3 separate folder part of samples to train, 1 part of samples to test

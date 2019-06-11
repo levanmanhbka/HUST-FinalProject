@@ -5,6 +5,9 @@ from dataset_loader import DatasetLoader
 import network_config as config
 from cnn_layers import Layers
 import os
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+os.environ["CUDA_VISIBLE_DEVICES"] = "0" 
 
 # Datasets
 dataset  = DatasetLoader()
@@ -128,19 +131,19 @@ layer_flat = tf.reshape(layer_conv5, [-1, num_features])
 print(layer_flat)
 
 # Fully-Connected Layer 1
-layer_fc1 = layers.new_fc_layer(layer_flat, num_inputs=num_features, num_outputs=1024, name="fc1")
+layer_fc1 = layers.new_fc_layer(layer_flat, num_inputs=num_features, num_outputs=512, name="fc1")
 # RelU layer 4
 layer_relu6 = layers.new_relu_layer(layer_fc1, name="relu6")
 print(layer_relu6)
 
 # Fully-Connected Layer 2
-layer_fc2 = layers.new_fc_layer(layer_relu6, num_inputs=1024, num_outputs=1024, name="fc2")
+layer_fc2 = layers.new_fc_layer(layer_relu6, num_inputs=512, num_outputs=512, name="fc2")
 # RelU layer 4
 layer_relu7 = layers.new_relu_layer(layer_fc2, name="relu7")
 print(layer_relu7)
 
 # Fully-Connected Layer 3
-layer_output = layers.new_fc_layer(input=layer_relu7, num_inputs=1024, num_outputs=image_types, name="fc3")
+layer_output = layers.new_fc_layer(input=layer_relu7, num_inputs=512, num_outputs=image_types, name="fc3")
 print(layer_output)
 
 # Use Softmax function to normalize the output
@@ -151,6 +154,7 @@ with tf.variable_scope("Softmax"):
 with tf.name_scope("cross_ent"):
     cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits=layer_output, labels=y_true)
     cost = tf.reduce_mean(cross_entropy)
+    tf.summary.scalar("cross_cost", cost)
 
 # Use Adam Optimizer
 with tf.name_scope("optimizer"):
@@ -160,6 +164,7 @@ with tf.name_scope("optimizer"):
 with tf.name_scope("accuracy"):
     correct_prediction = tf.equal(tf.argmax(y_pred, axis=1), tf.argmax(y_true, axis=1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+    tf.summary.scalar("accuracy", accuracy)
 
 # Merge all summaries together
 merged_summary = tf.summary.merge_all()
@@ -183,8 +188,8 @@ with tf.Session() as sess:
     # saver.restore(sess, os.path.join(model_path_name, 'model.ckpt'))
     # Add the model graph to TensorBoard
     writer_train.add_graph(sess.graph)
-    saver.save(sess, os.path.join(model_path_name, "model.ckpt"))
-    exit()
+    # saver.save(sess, os.path.join(model_path_name, "model.ckpt"))
+    # exit()
     # Loop over number of epochs
     for epoch in range(NUM_EPOCHS):
         num_batch = int(dataset.get_num_train()/BATCH_SIZE + 1)
