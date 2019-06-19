@@ -19,7 +19,7 @@ model_path_name= "resnet_model"
 #model_path_name= config.root_path + "/code_project/resnet_model" #for google colab
 
 # Config trainning
-NUM_EPOCHS = 50
+NUM_EPOCHS = 10
 BATCH_SIZE = 128
 
 # Model parameters
@@ -114,8 +114,8 @@ merged_summary = tf.summary.merge_all()
 # Initialize the FileWriter
 writer_train = tf.summary.FileWriter(model_path_name + "/train")
 writer_valid = tf.summary.FileWriter(model_path_name + "/valid")
-train_num_loop = 0
-valid_num_loop = 0
+train_num_loop = 7500
+valid_num_loop = 7500
 print('Run `tensorboard --logdir=%s` to see the results.' % model_path_name)
 
 # TensorFlow Session
@@ -124,10 +124,10 @@ with tf.Session() as sess:
     saver = tf.train.Saver(max_to_keep=4)
     # Initialize all variables
     sess.run(tf.global_variables_initializer())
-    # # create a saver object to load the model
-    # saver = tf.train.import_meta_graph(os.path.join(model_path_name, 'model.ckpt.meta'))
-    # # restore the model from our checkpoints folder
-    # saver.restore(sess, os.path.join(model_path_name, 'model.ckpt'))
+    # create a saver object to load the model
+    saver = tf.train.import_meta_graph(os.path.join(model_path_name, 'model.ckpt.meta'))
+    # restore the model from our checkpoints folder
+    saver.restore(sess, os.path.join(model_path_name, 'model.ckpt'))
     # Add the model graph to TensorBoard
     writer_train.add_graph(sess.graph)
     # saver.save(sess, os.path.join(model_path_name, "model.ckpt"))

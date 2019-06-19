@@ -7,7 +7,7 @@ from cnn_layers import Layers
 import os
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-os.environ["CUDA_VISIBLE_DEVICES"] = "0" 
+os.environ["CUDA_VISIBLE_DEVICES"] = "1" 
 
 # Datasets
 dataset  = DatasetLoader()
@@ -20,7 +20,7 @@ model_path_name= "vgg16_model"
 #model_path_name= config.root_path + "/code_project/vgg16_model" #for google colab
 
 # Config trainning
-NUM_EPOCHS = 50
+NUM_EPOCHS = 30
 BATCH_SIZE = 64
 
 # Model parameters
@@ -33,6 +33,8 @@ image_types = dataset.get_num_types()
 x_train = tf.placeholder(tf.float32, shape=[None, image_width, image_height, image_channel], name='x_train')
 # Placeholder variable for the true labels associated with the images
 y_true = tf.placeholder(tf.float32, shape=[None, image_types], name='y_true')
+# Using in dropout layer
+dropout_rate = tf.placeholder(tf.float32, name='dropout_rate')
 
 # Conv_11
 layer_conv1, weights_conv11 = layers.new_conv_layer(input_tensor=x_train, input_channel= image_channel, 
@@ -129,21 +131,24 @@ print(layer_conv5)
 num_features = layer_conv5.get_shape()[1:4].num_elements()
 layer_flat = tf.reshape(layer_conv5, [-1, num_features])
 print(layer_flat)
+layer_flat = tf.nn.dropout(x=layer_flat, rate = dropout_rate)
 
 # Fully-Connected Layer 1
 layer_fc1 = layers.new_fc_layer(layer_flat, num_inputs=num_features, num_outputs=512, name="fc1")
 # RelU layer 4
 layer_relu6 = layers.new_relu_layer(layer_fc1, name="relu6")
 print(layer_relu6)
+layer_relu6 = tf.nn.dropout(x=layer_relu6, rate = dropout_rate)
 
 # Fully-Connected Layer 2
-layer_fc2 = layers.new_fc_layer(layer_relu6, num_inputs=512, num_outputs=512, name="fc2")
+layer_fc2 = layers.new_fc_layer(layer_relu6, num_inputs=512, num_outputs=128, name="fc2")
 # RelU layer 4
 layer_relu7 = layers.new_relu_layer(layer_fc2, name="relu7")
 print(layer_relu7)
+layer_relu7 = tf.nn.dropout(x=layer_relu7, rate = dropout_rate)
 
 # Fully-Connected Layer 3
-layer_output = layers.new_fc_layer(input=layer_relu7, num_inputs=512, num_outputs=image_types, name="fc3")
+layer_output = layers.new_fc_layer(input=layer_relu7, num_inputs=128, num_outputs=image_types, name="fc3")
 print(layer_output)
 
 # Use Softmax function to normalize the output
@@ -205,10 +210,11 @@ with tf.Session() as sess:
             dataset.load_data_train_next(BATCH_SIZE)
             x_batch, y_batch = dataset.x_train, dataset.y_train
             # Put the batch into a dict with the proper names for placeholder variables
-            feed_dict_train = {x_train: x_batch, y_true: y_batch}
+            feed_dict_train = {x_train: x_batch, y_true: y_batch, dropout_rate:0.6}
             # Run the optimizer using this batch of training data.
             sess.run(optimizer, feed_dict=feed_dict_train)
             # Calculate the accuracy on the batch of training data
+            feed_dict_train = {x_train: x_batch, y_true: y_batch, dropout_rate:0.0}
             train_accuracy += sess.run(accuracy, feed_dict=feed_dict_train)
             # Generate summary with the current batch of data and write to file
             epoch_train += 1
@@ -226,7 +232,7 @@ with tf.Session() as sess:
         vali_accuracy = 0
         num_test_patch = 0.001
         while dataset.load_data_test_next(BATCH_SIZE):
-            summ, vali_accuracy_temp = sess.run([merged_summary, accuracy], feed_dict={x_train:dataset.x_test, y_true:dataset.y_test})
+            summ, vali_accuracy_temp = sess.run([merged_summary, accuracy], feed_dict={x_train:dataset.x_test, y_true:dataset.y_test, dropout_rate:0.0})
             writer_valid.add_summary(summ, valid_num_loop)
             vali_accuracy += vali_accuracy_temp
             num_test_patch += 1.0

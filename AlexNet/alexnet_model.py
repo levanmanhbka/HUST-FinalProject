@@ -4,7 +4,8 @@ from dataset_loader import DatasetLoader
 from cnn_layers import Layers
 import network_config as config
 import os
-
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+os.environ["CUDA_VISIBLE_DEVICES"] = "0" 
 # Layer
 layers = Layers()
 
@@ -12,7 +13,7 @@ layers = Layers()
 dataset  = DatasetLoader()
 
 # General parameters of the model
-NUM_EPOCHS = 50
+NUM_EPOCHS = 20
 BATCH_SIZE = 128
 
 DROPOUT_KEEP_PROB = 0.5
@@ -34,6 +35,8 @@ model_path_name= "alex_model"
 x_train = tf.placeholder(tf.float32, shape=[None, image_width, image_height, image_channel], name='x_train')
 # Placeholder variable for the true labels associated with the images
 y_true = tf.placeholder(tf.float32, shape=[None, image_types], name='y_true')
+# Using in dropout layer
+dropout_rate = tf.placeholder(tf.float32, name='dropout_rate')
 
 # Convolution Layer 1 | Response Normalization | Max Pooling | ReLU
 print("Convolutional Layer 1")
@@ -106,17 +109,17 @@ feature_map = tf.reshape(layer_conv5, [-1, num_features])
 print(feature_map)
 
 # Fully Connected Layer 1 | Dropout
-fc_layer_1 = layers.new_fc_layer(input=feature_map, num_inputs=num_features, num_outputs= 2048, name="fc_layer1")
-fc_layer_1 = tf.nn.dropout(fc_layer_1, keep_prob=DROPOUT_KEEP_PROB)
+fc_layer_1 = layers.new_fc_layer(input=feature_map, num_inputs=num_features, num_outputs= 512, name="fc_layer1")
+fc_layer_1 = tf.nn.dropout(fc_layer_1, rate = dropout_rate)
 print(fc_layer_1)
 
 # Fully Connected Layer 2 | Dropout
-fc_layer_2 = layers.new_fc_layer(input=fc_layer_1, num_inputs=2048, num_outputs= 2048, name="fc_layer2")
-fc_layer_2 = tf.nn.dropout(fc_layer_2, keep_prob=DROPOUT_KEEP_PROB)
+fc_layer_2 = layers.new_fc_layer(input=fc_layer_1, num_inputs=512, num_outputs= 512, name="fc_layer2")
+fc_layer_2 = tf.nn.dropout(fc_layer_2, rate = dropout_rate)
 print(fc_layer_2)
 
 # Fully Connected Layer 3 | Softmax
-fc_layer_3 = layers.new_fc_layer(input=fc_layer_2, num_inputs=2048, num_outputs= image_types, name="fc_layer3")
+fc_layer_3 = layers.new_fc_layer(input=fc_layer_2, num_inputs=512, num_outputs= image_types, name="fc_layer3")
 print(fc_layer_3)
 
 
@@ -146,8 +149,8 @@ merged_summary = tf.summary.merge_all()
 # Initialize the FileWriter
 writer_train = tf.summary.FileWriter(model_path_name + "/train")
 writer_valid = tf.summary.FileWriter(model_path_name + "/valid")
-train_num_loop = 0
-valid_num_loop = 0
+train_num_loop = 450
+valid_num_loop = 450
 print('Run `tensorboard --logdir=%s` to see the results.' % model_path_name)
 
 with tf.Session() as sess:
@@ -155,14 +158,14 @@ with tf.Session() as sess:
     saver = tf.train.Saver(max_to_keep=4)
     # Initialize the variables
     sess.run(tf.global_variables_initializer())
-    # # create a saver object to load the model
-    # saver = tf.train.import_meta_graph(os.path.join(model_path_name, 'model.ckpt.meta'))
-    # # restore the model from our checkpoints folder
-    # saver.restore(sess, os.path.join(model_path_name, 'model.ckpt'))
+    # create a saver object to load the model
+    saver = tf.train.import_meta_graph(os.path.join(model_path_name, 'model.ckpt.meta'))
+    # restore the model from our checkpoints folder
+    saver.restore(sess, os.path.join(model_path_name, 'model.ckpt'))
     # Add the model graph to TensorBoard
     writer_train.add_graph(sess.graph)
-    saver.save(sess, os.path.join(model_path_name, "model.ckpt"))
-    exit()
+    # saver.save(sess, os.path.join(model_path_name, "model.ckpt"))
+    # exit()
     # Loop over number of eporchs
     for epoch in range(NUM_EPOCHS):
         num_batch = int(dataset.get_num_train()/BATCH_SIZE)
@@ -178,10 +181,11 @@ with tf.Session() as sess:
             dataset.load_data_train_next(BATCH_SIZE)
             x_batch, y_batch = dataset.x_train, dataset.y_train
             # Put the batch into a dict with the proper names for placeholder variables
-            feed_dict_train = {x_train: x_batch, y_true: y_batch}
+            feed_dict_train = {x_train: x_batch, y_true: y_batch, dropout_rate : 0.5}
             # Run the optimizer using this batch of training data.
             sess.run(optimizer, feed_dict=feed_dict_train)
             # Calculate the accuracy on the batch of training data
+            feed_dict_train = {x_train: x_batch, y_true: y_batch, dropout_rate : 0.0}
             train_accuracy += sess.run(accuracy, feed_dict=feed_dict_train)
             # Generate summary with the current batch of data and write to file
             epoch_train += 1
@@ -199,7 +203,7 @@ with tf.Session() as sess:
         vali_accuracy = 0
         num_test_patch = 0.001
         while dataset.load_data_test_next(BATCH_SIZE):
-            summ, vali_accuracy_temp = sess.run([merged_summary, accuracy], feed_dict={x_train:dataset.x_test, y_true:dataset.y_test})
+            summ, vali_accuracy_temp = sess.run([merged_summary, accuracy], feed_dict={x_train:dataset.x_test, y_true:dataset.y_test, dropout_rate : 0.0})
             writer_valid.add_summary(summ, valid_num_loop)
             vali_accuracy += vali_accuracy_temp
             num_test_patch += 1.0

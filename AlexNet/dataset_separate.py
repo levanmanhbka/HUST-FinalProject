@@ -15,19 +15,17 @@ def create_dataset_folder():
         os.mkdir(config.test_folder_path)
 
 def crop_random_image(img, width, height):
-    w, h, c = img.shape
-    rx = w - width
-    ry = h - height
-    x = random.randint(int(rx/4), int(rx*3/4))
-    y = random.randint(int(ry/4), int(ry*3/4))
-    return img[y:y+height, x:x+width]
+    delta = random.randint(0, 20)
+    img = img[delta:480-delta, delta:480-delta]
+    img = cv.resize(img, (480, 480))
+    #print("delta", delta)
+    return img
 
  #3 separate folder part of samples to train, 1 part of samples to test
 def separate_folder(src_folder, id_class):
     list_src_image = os.listdir(src_folder)
     file_number = len(list_src_image)
     test_number = int(file_number / 4)
-    train_number = file_number - test_number
 
     list_src_image = random.sample(list_src_image, file_number)
     list_train_image = list_src_image[test_number:file_number]
@@ -45,9 +43,7 @@ def separate_folder(src_folder, id_class):
             if image is None:
                 os.remove(src_file)
             elif len(image.shape) == 3:
-                if train_number < len(list_train_image):
-                    image = cv.resize(image, (config.image_width, config.image_height))
-                else:
+                if train_number > len(list_train_image):
                     image = crop_random_image(image, config.image_width, config.image_height)
                 cv.imwrite(dst_file, image)
                 train_number = train_number + 1
@@ -65,10 +61,9 @@ def separate_folder(src_folder, id_class):
             if image is None:
                 os.remove(src_file)
             elif len(image.shape) == 3:
-                if test_number < len(list_test_image):
-                    image = cv.resize(image, (config.image_width, config.image_height))
-                else:
+                if test_number >= len(list_test_image):
                     image = crop_random_image(image, config.image_width, config.image_height)
+                image = cv.resize(image, (config.image_width, config.image_height))
                 cv.imwrite(dst_file, image)
                 test_number = test_number + 1
                 file_number = file_number + 1
@@ -76,7 +71,7 @@ def separate_folder(src_folder, id_class):
                 os.remove(src_file)
             if test_number >= config.num_test_file:
                 break
-        
+    
         
     return file_number, test_number, train_number
 

@@ -68,6 +68,24 @@ class DatasetLoader():
         self.x_train = self.x_train / 255.0
         self.x_test = self.x_test / 255.0
 
+    def augmentation(self, image):
+        rows, cols, depth = image.shape
+        mode = np.random.choice(range(0, 3))
+        #print("mode", mode)
+        if mode == 1:
+            angle = np.random.choice(range(-20, 20))
+            M = cv.getRotationMatrix2D((cols/2,rows/2),angle,1)
+            image = cv.warpAffine(image,M,(cols,rows))
+            #print("angle", angle)
+        elif mode == 2:
+            ychange = np.random.choice(range(-40, 40))
+            xchange = np.random.choice(range(-40, 40))
+            M = np.float32([[1,0,ychange],[0,1,xchange]])
+            image = cv.warpAffine(image,M,(cols,rows))
+            #print(ychange," " ,xchange)
+        image = cv.resize(image, (config.image_width, config.image_height))
+        return image
+
     def load_data_train_next(self, batch_size):
         x_train = []
         y_train = []
@@ -79,6 +97,7 @@ class DatasetLoader():
         list_chosed = self.list_train_image_name[self.x_train_index:self.x_train_index + batch_size]
         for sample_name in list_chosed:
             x,y = load_sample(config.train_folder_path, sample_name)
+            x = self.augmentation(x)
             x_train.append(x)
             y_train.append(y)
         # one hot encoding    
